@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Boxing Round Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0d0d0d; --fg:#ffffff; --muted:#bdbdbd;
+      --fight:#00ff88; --rest:#5bc0ff; --warn:#ffb020; --end:#ff3b3b;
+      --btnBlue:#1f6feb; --btnGreen:#28a745; --btnYellow:#ffc107; --btnRed:#dc3545; --btnGray:#2a2a2a;
+      --card:#0b0b0b; --stroke:#232323; --flash:#ffffff;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      background:var(--bg); color:var(--fg);
+      font-family:Arial, sans-serif;
+      text-align:center; padding:24px; margin:0;
+    }
+    h1{ margin: 8px 0 14px; font-size: 1.6rem; opacity: 0.95; }
+
+    .wrap{
+      max-width: 1100px; margin: 0 auto;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 980px){
+      .wrap.split{
+        grid-template-columns: 1fr 340px;
+        align-items:start;
+      }
+      .sidePanel{
+        display:block;
+      }
+    }
+
+    .sidePanel{
+      display:none;
+      text-align:left;
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, #141414, #0b0b0b);
+      border-radius: 16px;
+      padding: 12px;
+      position: sticky;
+      top: 14px;
+      height: fit-content;
+    }
+    .sideTitle{
+      font-weight: 900;
+      margin: 4px 0 10px;
+      opacity: 0.95;
+    }
+    .feed{
+      display:flex; flex-direction:column; gap:8px;
+      max-height: 420px; overflow:auto;
+      padding-right: 6px;
+    }
+    .feedItem{
+      border:1px solid #1f1f1f;
+      background:#090909;
+      border-radius: 12px;
+      padding: 10px;
+      line-height: 1.25;
+    }
+    .feedItem b{ display:block; margin-bottom:4px; }
+    .tiny{ font-size: 0.88rem; color: var(--muted); }
+
+    .adbar{
+      max-width: 860px; margin: 0 auto 12px;
+      border: 1px dashed #2a2a2a; border-radius: 14px;
+      padding: 10px 12px; color: var(--muted); background:#0b0b0b;
+      display:none;
+    }
+
+    .bar{
+      max-width: 860px; margin: 0 auto 14px;
+      padding: 12px 14px; border-radius: 16px;
+      background: linear-gradient(180deg, #1a1a1a, #101010);
+      border: 1px solid var(--stroke);
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .phase{
+      font-weight: 900; letter-spacing: 1px; font-size: 1.05rem;
+      padding: 8px 12px; border-radius: 999px; background: #0f0f0f; border: 1px solid #222;
+      min-width: 118px;
+    }
+    .phase.fight{ color: var(--fight); }
+    .phase.rest{ color: var(--rest); }
+    .phase.warn{ color: var(--warn); }
+    .phase.end{ color: var(--end); }
+
+    .meta{
+      text-align:right; font-size: 0.95rem; color: var(--muted);
+      line-height: 1.1; white-space: nowrap;
+    }
+    .meta b{ color: var(--fg); }
+
+    .progressWrap{
+      flex:1; height: 12px; background: #0b0b0b;
+      border: 1px solid #202020; border-radius: 999px; overflow:hidden;
+    }
+    .progressFill{ height:100%; width:0%; background: var(--fight); transition: width 250ms linear; }
+
+    #timer{
+      font-size:6rem; font-weight:900; margin:22px 0 10px;
+      color:var(--fight); letter-spacing: 1px;
+      user-select:none; cursor:pointer; touch-action: none;
+    }
+
+    .callout{
+      max-width: 860px;
+      margin: 0 auto 10px;
+      border: 1px solid #1f1f1f;
+      border-radius: 16px;
+      background: #090909;
+      padding: 12px 14px;
+    }
+    .callout .label{ color: var(--muted); font-size: 0.95rem; text-align:left; }
+    .callout .big{
+      font-weight: 900;
+      font-size: clamp(1.4rem, 3.6vw, 2.2rem);
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+      text-align:left;
+      word-break: break-word;
+    }
+
+    .row{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; margin:10px 0; }
+    .controls button{
+      padding: 12px 18px; margin: 6px; font-size: 1.02rem;
+      border:none; border-radius: 14px; cursor:pointer; font-weight:800; color:#fff; user-select:none;
+    }
+    .fs{ background: var(--btnBlue); }
+    .start{ background: var(--btnGreen); }
+    .pause{ background: var(--btnYellow); color:#111 !important; }
+    .reset{ background: var(--btnRed); }
+    .ghost{ background: var(--btnGray); }
+
+    .hint{ margin-top: 10px; opacity:0.75; font-size:0.95rem; }
+
+    body.fullscreen{ padding: 16px; }
+    body.fullscreen #timer{ font-size: min(18vw, 11.5rem); margin: 12px 0 10px; }
+    body.fullscreen .bar{ max-width: 1100px; }
+    body.minimal h1, body.minimal .hint{ display:none !important; }
+    body.ultraminimal .bar,
+    body.ultraminimal .controls,
+    body.ultraminimal h1,
+    body.ultraminimal .hint,
+    body.ultraminimal .callout,
+    body.ultraminimal .adbar { display:none !important; }
+    body.ultraminimal #timer{ margin-top: 18vh; font-size: min(26vw, 12.5rem); }
+
+    body.gymmode .controls button{
+      font-size: 1.25rem;
+      padding: 18px 20px;
+      border-radius: 18px;
+      min-width: 46%;
+    }
+    body.gymmode .controls button.hideInGym{ display:none !important; }
+
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.02)} 100%{transform:scale(1)} }
+    body.pulse #timer{ animation: pulse 0.65s ease-in-out infinite; }
+
+    @media (max-width: 600px){
+      body{ padding: 16px; }
+      #timer{ font-size: min(22vw, 7.5rem); margin: 18px 0 10px; }
+      .controls button{ padding: 16px 16px; font-size: 1.05rem; border-radius: 16px; min-width: 44%; }
+    }
+
+    /* SETTINGS DRAWER */
+    .backdrop{ position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:none; z-index: 50; }
+    .backdrop.open{ display:block; }
+    .drawer{
+      position: fixed; top: 0; right: 0; height: 100%;
+      width: min(480px, 95vw);
+      background: linear-gradient(180deg, #141414, #0b0b0b);
+      border-left: 1px solid var(--stroke);
+      transform: translateX(110%); transition: transform 220ms ease;
+      z-index: 60; padding: 14px; overflow: auto; text-align:left;
+    }
+    .drawer.open{ transform: translateX(0); }
+
+    .drawerHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+    .drawerHeader h2{ margin: 0; font-size: 1.15rem; letter-spacing: .4px; }
+    .iconBtn{
+      border:none; border-radius: 12px; padding: 10px 12px;
+      cursor:pointer; font-weight: 900;
+      background: #1b1b1b; color: #fff; border: 1px solid #2a2a2a;
+    }
+
+    .card{
+      background: var(--card); border: 1px solid var(--stroke);
+      border-radius: 14px; padding: 12px; margin: 10px 0;
+    }
+    .cardTitle{ font-weight: 900; margin-bottom: 10px; opacity: 0.95; }
+    .fieldRow{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; margin: 10px 0; color: var(--muted); font-size: 0.95rem;
+    }
+    .fieldRow strong{ color: var(--fg); }
+
+    select,input{
+      padding:10px 12px; border-radius:12px; border:none;
+      font-size:1rem; outline:none; background: #f2f2f2; color:#111;
+    }
+    input[type="number"]{ width:120px; text-align:center; }
+    input[type="range"]{ width: 230px; }
+
+    .miniBtns button{
+      padding:10px 12px; border:none; border-radius: 12px; cursor:pointer;
+      font-weight: 900; color:#fff; background: var(--btnGray);
+      margin-right: 8px; margin-top: 8px;
+    }
+    .pillNote{ margin-top: 8px; opacity: 0.75; font-size: 0.9rem; line-height: 1.35; }
+
+    .item{
+      border:1px solid #1f1f1f; border-radius:12px; padding:10px;
+      background:#090909; margin:8px 0;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .itemLeft{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+    .itemName{ font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .itemDesc{ font-size:0.88rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .itemBtns{ display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; }
+    .itemBtns button{
+      padding:10px 10px; border-radius:12px; border:none; cursor:pointer; font-weight:900; color:#fff;
+      background: var(--btnGray);
+    }
+    .apply{ background: var(--btnBlue) !important; }
+    .del{ background: var(--btnRed) !important; }
+    .updown{ background: #3a3a3a !important; }
+
+    /* Flash overlay */
+    .flash{
+      position: fixed; inset: 0; background: var(--flash);
+      opacity: 0; pointer-events:none; z-index: 999;
+      transition: opacity 120ms ease;
+    }
+    .flash.on{ opacity: 0.14; }
+
+    /* Lock overlay */
+    .lockHint{
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 10px 12px; border-radius: 14px;
+      color: #fff; font-weight: 900; z-index: 998;
+      display:none;
+    }
+    body.locked .lockHint{ display:block; }
+
+    /* Corner quick buttons (optional) */
+    .cornerDock{
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 997;
+      display:none;
+      gap:10px;
+      flex-wrap:wrap;
+      max-width: min(520px, calc(100vw - 24px));
+    }
+    body.cornerDockOn .cornerDock{
+      display:flex;
+    }
+    .cornerDock button{
+      background:#111;
+      border:1px solid #2a2a2a;
+      color:#fff;
+      font-weight:900;
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor:pointer;
+      user-select:none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="flash" class="flash"></div>
+  <div class="lockHint">🔒 Controls locked. Tap timer 3x fast to unlock.</div>
+
+  <div class="cornerDock" id="cornerDock">
+    <button onclick="cornerEvent('KD')">KD</button>
+    <button onclick="cornerEvent('BIG SHOT')">Big Shot</button>
+    <button onclick="cornerEvent('GASSED')">Gassed</button>
+    <button onclick="cornerEvent('NOTE')">Note</button>
+  </div>
+
+  <h1>🥊 ROUND TIMER</h1>
+
+  <div id="adbar" class="adbar">Ad placeholder (hidden in Pro). Put AdSense here later.</div>
+
+  <div class="wrap" id="wrap">
+    <div>
+      <div class="bar">
+        <div id="phasePill" class="phase fight">READY</div>
+
+        <div class="progressWrap">
+          <div id="progressFill" class="progressFill"></div>
+        </div>
+
+        <div class="meta">
+          <div><b id="roundMeta">Step 1/1</b></div>
+          <div id="timeMeta">00:00</div>
+        </div>
+      </div>
+
+      <div class="callout" id="calloutBox">
+        <div class="label">Combo Callout</div>
+        <div class="big" id="calloutText">Off</div>
+      </div>
+
+      <div id="timer" title="Tap = Start/Pause · Swipe ←/→ time · Swipe ↑/↓ volume">03:00</div>
+
+      <div class="row controls" id="controlsRow">
+        <button class="ghost hideInGym" onclick="openSettings()">⚙️ Settings</button>
+        <button class="fs hideInGym" id="fsBtn" onclick="toggleFullscreen()">Fullscreen</button>
+        <button class="ghost hideInGym" id="minBtn" onclick="toggleMinimal()">Minimal: Off</button>
+        <button class="ghost hideInGym" id="ultraBtn" onclick="toggleUltraMinimal()">Ultra: Off</button>
+
+        <button class="ghost" id="gymBtn" onclick="toggleGymMode()">Gym Mode: Off</button>
+        <button class="ghost" id="lockBtn" onclick="toggleLock()">Lock: Off</button>
+
+        <button class="start" id="startBtn" onclick="start()">Start</button>
+        <button class="pause" id="pauseBtn" onclick="pause()">Pause</button>
+        <button class="reset hideInGym" onclick="reset()">Reset</button>
+
+        <button class="ghost" onclick="undoSkip()">Undo</button>
+        <button class="ghost" onclick="addRest10()">+10s Rest</button>
+        <button class="ghost" onclick="skipStep()">Skip</button>
+      </div>
+
+      <div class="hint">Combo + Tempo + Corner mode = coach vibes. Shake-to-pause works on phones.</div>
+    </div>
+
+    <aside class="sidePanel" id="sidePanel">
+      <div class="sideTitle">Live Feed</div>
+      <div class="tiny" id="feedHint">Callouts + corner events show up here.</div>
+      <div class="feed" id="feed"></div>
+    </aside>
+  </div>
+
+  <!-- Settings Drawer -->
+  <div id="backdrop" class="backdrop" onclick="closeSettings()"></div>
+
+  <aside id="drawer" class="drawer" aria-label="Settings">
+    <div class="drawerHeader">
+      <h2>Settings</h2>
+      <button class="iconBtn" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Mode</div>
+
+      <div class="fieldRow">
+        <strong>Training mode</strong>
+        <select id="modeSel">
+          <option value="standard">Standard (Rounds/Rest)</option>
+          <option value="emom">EMOM</option>
+          <option value="tabata">Tabata</option>
+          <option value="hiit">HIIT Blocks</option>
+          <option value="sequence">Sequence Builder</option>
+        </select>
+      </div>
+
+      <div class="pillNote tiny">
+        Modes generate a sequence. Sequence Builder lets you build anything. Use the Workout Library for fast setups.
+      </div>
+    </div>
+
+    <div class="card" id="standardCard">
+      <div class="cardTitle">Standard Setup</div>
+
+      <div class="fieldRow"><strong>Rounds</strong><input id="rounds" type="number" value="5" min="1"></div>
+      <div class="fieldRow"><strong>Round (sec)</strong><input id="roundTime" type="number" value="180" min="1"></div>
+      <div class="fieldRow"><strong>Rest (sec)</strong><input id="restTime" type="number" value="60" min="0"></div>
+
+      <div class="fieldRow"><strong>Warmup (sec)</strong><input id="warmupTime" type="number" value="0" min="0"></div>
+      <div class="fieldRow"><strong>Cooldown (sec)</strong><input id="cooldownTime" type="number" value="0" min="0"></div>
+
+      <div class="miniBtns">
+        <button onclick="rebuildFromMode()">Rebuild sequence</button>
+      </div>
+    </div>
+
+    <div class="card" id="emomCard" style="display:none;">
+      <div class="cardTitle">EMOM Setup</div>
+      <div class="fieldRow"><strong>Minutes</strong><input id="emomMinutes" type="number" value="10" min="1"></div>
+      <div class="fieldRow"><strong>Work window (sec)</strong><input id="emomWork" type="number" value="45" min="1"></div>
+      <div class="fieldRow"><strong>Rest window (sec)</strong><input id="emomRest" type="number" value="15" min="0"></div>
+      <div class="miniBtns"><button onclick="rebuildFromMode()">Rebuild sequence</button></div>
+    </div>
+
+    <div class="card" id="tabataCard" style="display:none;">
+      <div class="cardTitle">Tabata Setup</div>
+      <div class="fieldRow"><strong>Cycles</strong><input id="tabataCycles" type="number" value="8" min="1"></div>
+      <div class="fieldRow"><strong>Work (sec)</strong><input id="tabataWork" type="number" value="20" min="1"></div>
+      <div class="fieldRow"><strong>Rest (sec)</strong><input id="tabataRest" type="number" value="10" min="0"></div>
+      <div class="miniBtns"><button onclick="rebuildFromMode()">Rebuild sequence</button></div>
+    </div>
+
+    <div class="card" id="hiitCard" style="display:none;">
+      <div class="cardTitle">HIIT Blocks Setup</div>
+      <div class="fieldRow"><strong>Repeats</strong><input id="hiitRepeats" type="number" value="10" min="1"></div>
+      <div class="fieldRow"><strong>Work (sec)</strong><input id="hiitWork" type="number" value="30" min="1"></div>
+      <div class="fieldRow"><strong>Rest (sec)</strong><input id="hiitRest" type="number" value="30" min="0"></div>
+      <div class="miniBtns"><button onclick="rebuildFromMode()">Rebuild sequence</button></div>
+    </div>
+
+    <div class="card" id="sequenceCard" style="display:none;">
+      <div class="cardTitle">Sequence Builder</div>
+
+      <div class="fieldRow">
+        <strong>Block type</strong>
+        <select id="seqType">
+          <option value="fight">Fight/Work</option>
+          <option value="rest">Rest</option>
+          <option value="warmup">Warmup</option>
+          <option value="cooldown">Cooldown</option>
+          <option value="note">Note (0s)</option>
+        </select>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Label</strong>
+        <input id="seqLabel" type="text" placeholder="Bag Work" maxlength="40" style="width: 240px;">
+      </div>
+
+      <div class="fieldRow">
+        <strong>Seconds</strong>
+        <input id="seqSeconds" type="number" value="180" min="0">
+      </div>
+
+      <div class="fieldRow">
+        <strong>Repeat</strong>
+        <input id="seqRepeat" type="number" value="1" min="1">
+      </div>
+
+      <div class="miniBtns">
+        <button style="background:var(--btnGreen);" onclick="addSeqBlock()">Add block</button>
+        <button onclick="rebuildFromMode()">Load from mode</button>
+      </div>
+
+      <div class="pillNote tiny">Reorder blocks with ↑/↓. Notes show text and auto-advance.</div>
+      <div id="seqList"></div>
+
+      <div class="miniBtns">
+        <button style="background:var(--btnRed);" onclick="clearSequence()">Clear sequence</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Combo Callouts</div>
+
+      <div class="fieldRow">
+        <strong>Enable callouts</strong>
+        <button class="iconBtn" id="calloutOnBtn" onclick="toggleCallouts()">Off</button>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Bag type</strong>
+        <select id="bagType">
+          <option value="heavy">Heavy Bag</option>
+          <option value="aqua">Aqua Bag</option>
+          <option value="reflex">Reflex Bag</option>
+          <option value="shadow">Shadow Boxing</option>
+        </select>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Frequency (sec)</strong>
+        <input id="calloutEvery" type="number" value="10" min="3">
+      </div>
+
+      <div class="fieldRow">
+        <strong>Voice callouts</strong>
+        <button class="iconBtn" id="ttsCalloutBtn" onclick="toggleTTSCallouts()">Off</button>
+      </div>
+
+      <div class="pillNote tiny">Only triggers during Fight/Work steps. (Not rest.)</div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Tempo Trainer</div>
+
+      <div class="fieldRow">
+        <strong>Enable tempo</strong>
+        <button class="iconBtn" id="tempoOnBtn" onclick="toggleTempo()">Off</button>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Tick interval (sec)</strong>
+        <input id="tempoEvery" type="number" value="5" min="1">
+      </div>
+
+      <div class="fieldRow">
+        <strong>Punch target/min</strong>
+        <input id="punchTarget" type="number" value="0" min="0">
+      </div>
+
+      <div class="pillNote tiny">
+        If target/min &gt; 0, you’ll get a cue every 10 seconds: “hit X punches now”.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Corner Mode</div>
+
+      <div class="fieldRow">
+        <strong>Enable corner log</strong>
+        <button class="iconBtn" id="cornerOnBtn" onclick="toggleCorner()">Off</button>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Show quick buttons</strong>
+        <button class="iconBtn" id="cornerDockBtn" onclick="toggleCornerDock()">Off</button>
+      </div>
+
+      <div class="miniBtns">
+        <button onclick="openCornerLog()">View session timeline</button>
+        <button style="background:var(--btnRed);" onclick="clearCornerLog()">Clear timeline</button>
+      </div>
+
+      <div class="pillNote tiny">Tap events while training. Saves with your workout history.</div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Cues + AI Rest</div>
+
+      <div class="fieldRow">
+        <strong>Flash on cues</strong>
+        <button class="iconBtn" id="flashBtn" onclick="toggleFlash()">On</button>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Adaptive rest</strong>
+        <button class="iconBtn" id="adaptBtn" onclick="toggleAdaptive()">On</button>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Rule</strong>
+        <select id="adaptRule">
+          <option value="pause2_add15">If paused ≥2 times, +15s next rest</option>
+          <option value="pause3_add30">If paused ≥3 times, +30s next rest</option>
+          <option value="nopause_trim5">If no pauses, -5s next rest</option>
+        </select>
+      </div>
+
+      <div class="pillNote tiny">Applies during Standard/Sequence rests. Doesn’t change your saved base rest value.</div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Sound + Voice</div>
+
+      <div class="fieldRow">
+        <strong>Sound pack</strong>
+        <select id="soundPack">
+          <option value="classic">Classic</option>
+          <option value="modern">Modern (beeps)</option>
+          <option value="silent">Silent</option>
+        </select>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Announce steps</strong>
+        <button class="iconBtn" id="ttsStepBtn" onclick="toggleTTSSteps()">Off</button>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Arena ambience</strong>
+        <button class="iconBtn" id="ambBtn" onclick="toggleAmbience()">Off</button>
+      </div>
+
+      <div class="fieldRow"><strong>Mute</strong><button class="iconBtn" id="muteBtn" onclick="toggleMute()">Off</button></div>
+
+      <div class="fieldRow">
+        <strong>Master</strong>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input id="vol" type="range" min="0" max="100" value="90">
+          <span id="volLabel" style="min-width:44px; text-align:right;">90%</span>
+        </div>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Clap</strong>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input id="clapVol" type="range" min="0" max="200" value="100">
+          <span id="clapLabel" style="min-width:52px; text-align:right;">100%</span>
+        </div>
+      </div>
+
+      <div class="fieldRow">
+        <strong>Bell</strong>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input id="bellVol" type="range" min="0" max="200" value="110">
+          <span id="bellLabel" style="min-width:52px; text-align:right;">110%</span>
+        </div>
+      </div>
+
+      <div class="fieldRow">
+        <strong>10s Warning</strong>
+        <select id="warnPattern">
+          <option value="claps3">3 Claps</option>
+          <option value="beeps10">10 Beeps</option>
+          <option value="beeps3">3 Beeps</option>
+        </select>
+      </div>
+
+      <div class="fieldRow">
+        <strong>End-of-step</strong>
+        <select id="endPattern">
+          <option value="bell3">Triple Bell</option>
+          <option value="bellLong">Single Long Bell</option>
+        </select>
+      </div>
+
+      <div class="miniBtns">
+        <button onclick="testClap()">Test Clap</button>
+        <button onclick="testBell()">Test Bell</button>
+        <button onclick="testBeep()">Test Beep</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Workout Library</div>
+
+      <div class="fieldRow">
+        <strong>Pick workout</strong>
+        <select id="librarySel"></select>
+      </div>
+
+      <div class="miniBtns">
+        <button style="background:var(--btnGreen);" onclick="loadLibraryWorkout()">Load to Sequence</button>
+        <button onclick="switchToSequenceMode()">Go to Sequence Mode</button>
+      </div>
+
+      <div class="pillNote tiny">Library loads into Sequence Builder so you can edit and save favorites.</div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Phone Safety</div>
+
+      <div class="fieldRow">
+        <strong>Shake to pause</strong>
+        <button class="iconBtn" id="shakeBtn" onclick="toggleShake()">Off</button>
+      </div>
+
+      <div class="pillNote tiny">On phones/tablets with motion sensors. Debounced to avoid false triggers.</div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">Share + Stats</div>
+
+      <div class="miniBtns">
+        <button onclick="copyShareLink(false)">Copy share link (full)</button>
+        <button onclick="copyShareLink(true)">Copy link (workout only)</button>
+        <button style="background:var(--btnBlue);" onclick="downloadShareCard()">Download share card</button>
+      </div>
+
+      <div class="pillNote tiny" id="shareNote">Share links include settings + sequence + library blocks.</div>
+
+      <div class="fieldRow"><strong>Personal best: No-pause session</strong><span id="pbNoPause" class="tiny">—</span></div>
+      <div class="fieldRow"><strong>Total sessions</strong><span id="pbSessions" class="tiny">—</span></div>
+      <div class="fieldRow"><strong>Total active time</strong><span id="pbTime" class="tiny">—</span></div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">System</div>
+
+      <div class="fieldRow"><strong>Keep screen awake</strong><button class="iconBtn" id="wakeBtn" onclick="toggleWake()">Off</button></div>
+      <div class="fieldRow"><strong>Vibration</strong><button class="iconBtn" id="vibeBtn" onclick="toggleVibe()">Off</button></div>
+
+      <div class="fieldRow"><strong>Pro (placeholder)</strong><button class="iconBtn" id="proBtn" onclick="togglePro()">Off</button></div>
+
+      <div class="miniBtns">
+        <button style="background:var(--btnRed);" onclick="resetSettings()">Reset saved settings</button>
+      </div>
+
+      <div class="pillNote tiny">
+        Shortcuts: Space start/pause · R reset · F fullscreen · S settings · Esc close · ↑/↓ volume
+      </div>
+    </div>
+  </aside>
+
+  <script>
+  /* ========= KEYS ========= */
+  const SETTINGS_KEY="boxing_timer_settings_v7";
+  const HISTORY_KEY ="boxing_timer_history_v3";
+  const FAV_KEY     ="boxing_timer_favorites_v3";
+  const PB_KEY      ="boxing_timer_pbs_v1";
+
+  /* ========= SAFE ========= */
+  const safeParse=(t)=>{ try{return JSON.parse(t)}catch{return null} };
+  const clampInt=(n,min,max,f)=>{ const x=parseInt(n,10); if(!Number.isFinite(x)) return f; return Math.max(min,Math.min(max,x)); };
+  const esc=(s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+  const formatTime=(s)=>{ const m=Math.floor(s/60), sec=s%60; return `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`; };
+  const nowISO=()=>new Date().toISOString();
+
+  /* ========= DOM ========= */
+  const flashEl=document.getElementById("flash");
+  const adbar=document.getElementById("adbar");
+  const wrap=document.getElementById("wrap");
+  const sidePanel=document.getElementById("sidePanel");
+  const feedEl=document.getElementById("feed");
+
+  const phasePill=document.getElementById("phasePill");
+  const progressFill=document.getElementById("progressFill");
+  const roundMeta=document.getElementById("roundMeta");
+  const timeMeta=document.getElementById("timeMeta");
+  const timerEl=document.getElementById("timer");
+
+  const calloutBox=document.getElementById("calloutBox");
+  const calloutText=document.getElementById("calloutText");
+
+  const backdrop=document.getElementById("backdrop");
+  const drawer=document.getElementById("drawer");
+
+  const fsBtn=document.getElementById("fsBtn");
+  const minBtn=document.getElementById("minBtn");
+  const ultraBtn=document.getElementById("ultraBtn");
+  const lockBtn=document.getElementById("lockBtn");
+  const gymBtn=document.getElementById("gymBtn");
+
+  const startBtn=document.getElementById("startBtn");
+  const pauseBtn=document.getElementById("pauseBtn");
+
+  const modeSel=document.getElementById("modeSel");
+  const standardCard=document.getElementById("standardCard");
+  const emomCard=document.getElementById("emomCard");
+  const tabataCard=document.getElementById("tabataCard");
+  const hiitCard=document.getElementById("hiitCard");
+  const sequenceCard=document.getElementById("sequenceCard");
+
+  const roundsEl=document.getElementById("rounds");
+  const roundTimeEl=document.getElementById("roundTime");
+  const restTimeEl=document.getElementById("restTime");
+  const warmupEl=document.getElementById("warmupTime");
+  const cooldownEl=document.getElementById("cooldownTime");
+
+  const emomMinutesEl=document.getElementById("emomMinutes");
+  const emomWorkEl=document.getElementById("emomWork");
+  const emomRestEl=document.getElementById("emomRest");
+
+  const tabCyclesEl=document.getElementById("tabataCycles");
+  const tabWorkEl=document.getElementById("tabataWork");
+  const tabRestEl=document.getElementById("tabataRest");
+
+  const hiitRepeatsEl=document.getElementById("hiitRepeats");
+  const hiitWorkEl=document.getElementById("hiitWork");
+  const hiitRestEl=document.getElementById("hiitRest");
+
+  const seqTypeEl=document.getElementById("seqType");
+  const seqLabelEl=document.getElementById("seqLabel");
+  const seqSecEl=document.getElementById("seqSeconds");
+  const seqRepEl=document.getElementById("seqRepeat");
+  const seqListEl=document.getElementById("seqList");
+
+  // callouts
+  const calloutOnBtn=document.getElementById("calloutOnBtn");
+  const bagTypeEl=document.getElementById("bagType");
+  const calloutEveryEl=document.getElementById("calloutEvery");
+  const ttsCalloutBtn=document.getElementById("ttsCalloutBtn");
+
+  // tempo
+  const tempoOnBtn=document.getElementById("tempoOnBtn");
+  const tempoEveryEl=document.getElementById("tempoEvery");
+  const punchTargetEl=document.getElementById("punchTarget");
+
+  // corner
+  const cornerOnBtn=document.getElementById("cornerOnBtn");
+  const cornerDockBtn=document.getElementById("cornerDockBtn");
+  const cornerDock=document.getElementById("cornerDock");
+
+  // cues + adapt
+  const flashBtn=document.getElementById("flashBtn");
+  const adaptBtn=document.getElementById("adaptBtn");
+  const adaptRuleEl=document.getElementById("adaptRule");
+
+  // sound
+  const soundPackEl=document.getElementById("soundPack");
+  const ttsStepBtn=document.getElementById("ttsStepBtn");
+  const ambBtn=document.getElementById("ambBtn");
+  const muteBtn=document.getElementById("muteBtn");
+  const volEl=document.getElementById("vol");
+  const clapVolEl=document.getElementById("clapVol");
+  const bellVolEl=document.getElementById("bellVol");
+  const volLabel=document.getElementById("volLabel");
+  const clapLabel=document.getElementById("clapLabel");
+  const bellLabel=document.getElementById("bellLabel");
+  const warnPatternEl=document.getElementById("warnPattern");
+  const endPatternEl=document.getElementById("endPattern");
+
+  // library
+  const librarySel=document.getElementById("librarySel");
+
+  // phone
+  const shakeBtn=document.getElementById("shakeBtn");
+
+  // share + stats
+  const shareNote=document.getElementById("shareNote");
+  const pbNoPauseEl=document.getElementById("pbNoPause");
+  const pbSessionsEl=document.getElementById("pbSessions");
+  const pbTimeEl=document.getElementById("pbTime");
+
+  // system
+  const wakeBtn=document.getElementById("wakeBtn");
+  const vibeBtn=document.getElementById("vibeBtn");
+  const proBtn=document.getElementById("proBtn");
+
+  /* ========= STATE ========= */
+  let ctx=null, master=null;
+  let ambienceNode=null;
+  let muted=false;
+
+  let running=false;
+  let interval=null;
+
+  let sequence=[];    // expanded steps
+  let stepIndex=0;
+  let timeLeft=180;
+  let stepDuration=180;
+
+  let undoStack=[];
+
+  let stepFlags={ warned10:false };
+  let lastCalloutAt=-99999;
+  let lastTempoAt=-99999;
+  let lastTargetAt=-99999;
+
+  let pauseCount=0;
+  let pausesThisSession=0;
+
+  let sessionStartTs=null;
+  let sessionActiveSeconds=0;
+
+  let wakeLock=null;
+
+  let cornerTimeline=[]; // events for current session
+  let cornerEnabled=false;
+  let cornerDockEnabled=false;
+
+  // device motion
+  let shakeEnabled=false;
+  let lastShakeAt=0;
+
+  // config
+  let cfg={
+    mode:"standard",
+    minimal:false,
+    ultraminimal:false,
+    locked:false,
+    gymmode:false,
+    pro:false,
+
+    flash:true,
+    adaptive:true,
+    adaptRule:"pause2_add15",
+
+    soundPack:"classic",
+    announceSteps:false,
+    ambience:false,
+
+    calloutsOn:false,
+    bagType:"heavy",
+    calloutEvery:10,
+    calloutVoice:false,
+
+    tempoOn:false,
+    tempoEvery:5,
+    punchTargetPerMin:0,
+
+    wake:false,
+    vibe:false
+  };
+
+  /* ========= WORKOUT LIBRARY ========= */
+  const LIBRARY = [
+    {
+      id:"bag_beginner_6x2",
+      name:"Heavy Bag Beginner (6x2 / 1m rest)",
+      blocks:[
+        {type:"warmup", label:"Warmup: footwork + jab", seconds:120, repeat:1},
+        {type:"fight",  label:"Round 1: jab only", seconds:120, repeat:1},
+        {type:"rest",   label:"Rest", seconds:60, repeat:1},
+        {type:"fight",  label:"Round 2: 1-2 only", seconds:120, repeat:1},
+        {type:"rest",   label:"Rest", seconds:60, repeat:1},
+        {type:"fight",  label:"Round 3: body jabs + 2", seconds:120, repeat:1},
+        {type:"rest",   label:"Rest", seconds:60, repeat:1},
+        {type:"fight",  label:"Round 4: hooks", seconds:120, repeat:1},
+        {type:"rest",   label:"Rest", seconds:60, repeat:1},
+        {type:"fight",  label:"Round 5: defense + counters", seconds:120, repeat:1},
+        {type:"rest",   label:"Rest", seconds:60, repeat:1},
+        {type:"fight",  label:"Round 6: free work", seconds:120, repeat:1},
+        {type:"cooldown", label:"Cooldown: breathe + shakeout", seconds:120, repeat:1},
+      ]
+    },
+    {
+      id:"aqua_power_8x3",
+      name:"Aqua Bag Power (8x3 / 45s rest)",
+      blocks:[
+        {type:"warmup", label:"Warmup: light volume", seconds:180, repeat:1},
+        {type:"fight", label:"R1: straight shots", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R2: hooks to body/head", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R3: 2-3-2", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R4: 1-2-3-2", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R5: power shots (pick 2)", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R6: feints + power", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R7: angles + power finish", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:45, repeat:1},
+        {type:"fight", label:"R8: last round burn", seconds:180, repeat:1},
+        {type:"cooldown", label:"Cooldown", seconds:120, repeat:1},
+      ]
+    },
+    {
+      id:"reflex_reaction_10x1",
+      name:"Reflex Bag Reaction (10x1 / 30s rest)",
+      blocks:[
+        {type:"warmup", label:"Warmup: eyes up, light touches", seconds:120, repeat:1},
+        {type:"fight", label:"R1: jab only", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R2: double jab", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R3: jab-slip-jab", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R4: 1-2", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R5: jab-hook", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R6: defense only (slip/roll)", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R7: counters", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R8: angles + touch", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R9: speed", seconds:60, repeat:1},
+        {type:"rest", label:"Rest", seconds:30, repeat:1},
+        {type:"fight", label:"R10: flow", seconds:60, repeat:1},
+        {type:"cooldown", label:"Cooldown", seconds:120, repeat:1},
+      ]
+    },
+    {
+      id:"shadow_skill_5x3",
+      name:"Shadow Boxing Skill (5x3 / 1m rest)",
+      blocks:[
+        {type:"warmup", label:"Warmup: footwork", seconds:180, repeat:1},
+        {type:"fight", label:"R1: jab + movement", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:60, repeat:1},
+        {type:"fight", label:"R2: defense + counters", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:60, repeat:1},
+        {type:"fight", label:"R3: body work", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:60, repeat:1},
+        {type:"fight", label:"R4: combos + angles", seconds:180, repeat:1},
+        {type:"rest", label:"Rest", seconds:60, repeat:1},
+        {type:"fight", label:"R5: fight simulation", seconds:180, repeat:1},
+        {type:"cooldown", label:"Cooldown", seconds:120, repeat:1},
+      ]
+    }
+  ];
+
+  /* ========= COMBO BANKS ========= */
+  const COMBOS = {
+    heavy: [
+      "1–2", "1–2–3", "1–2–3–2", "2–3–2", "3–2–3", "1–1–2",
+      "jab to body → 2", "double jab → 2", "1–2 → roll → 2",
+      "1 → slip R → 2", "2 → slip L → 2", "1–2 → pivot out",
+      "1–2 → hook to body", "3 to body → 3 to head", "2–3 → 2",
+      "1–2–5–2", "3–4 (hooks)", "2 (power) then 1-2 fast"
+    ],
+    aqua: [
+      "1–2 (snap)", "2–3–2 (hard)", "3 to body → 2", "1–2 → 3 to body",
+      "1–2–3–2 (power finish)", "jab → cross to body", "2–2 (double cross)",
+      "3–2 (turn the hips)", "5–2", "1–2 → roll → 3", "body-head-body"
+    ],
+    reflex: [
+      "jab only", "double jab", "1–2", "jab → slip → jab", "touch-touch (speed)",
+      "1 → step out", "1 → pull → 2", "touch with lead hand only", "defense only (slips/rolls)",
+      "counter: slip → 2", "angle step + jab", "1–1–2"
+    ],
+    shadow: [
+      "footwork only (30s)", "jab + movement", "1–2 + pivot", "defense only",
+      "feint → 1–2", "1–2–3, exit", "body jab → 2", "pull → 2", "slip-slip → 2",
+      "roll → 3", "angle + 1–2", "freestyle (stay relaxed)"
+    ]
+  };
+
+  /* ========= UTILS ========= */
+  function openSettings(){ backdrop.classList.add("open"); drawer.classList.add("open"); renderSeq(); updatePBUI(); }
+  function closeSettings(){ backdrop.classList.remove("open"); drawer.classList.remove("open"); }
+  function flash(){
+    if(!cfg.flash) return;
+    flashEl.classList.add("on");
+    setTimeout(()=>flashEl.classList.remove("on"), 140);
+  }
+  function vibe(pattern){
+    if(!cfg.vibe) return;
+    if(typeof navigator?.vibrate!=="function") return;
+    try{ navigator.vibrate(pattern); }catch{}
+  }
+
+  function logFeed(title, body){
+    // enable split view automatically if anything is logging
+    wrap.classList.add("split");
+    const item=document.createElement("div");
+    item.className="feedItem";
+    item.innerHTML = `<b>${esc(title)}</b><div class="tiny">${esc(body)}</div>`;
+    feedEl.prepend(item);
+    // keep it from becoming infinite doom scroll
+    while(feedEl.children.length>30) feedEl.removeChild(feedEl.lastChild);
+  }
+
+  /* ========= AUDIO ========= */
+  function ensureAudio(){
+    if(!ctx){
+      ctx=new (window.AudioContext||window.webkitAudioContext)();
+      master=ctx.createGain();
+      master.connect(ctx.destination);
+    }
+    if(ctx.state!=="running") ctx.resume();
+    applyVolumes();
+  }
+  function applyVolumes(){
+    if(!master) return;
+    const masterPct=parseInt(volEl.value,10)/100;
+    master.gain.value = muted ? 0 : (masterPct*2.7);
+  }
+  function toggleMute(){ muted=!muted; applyVolumes(); saveSettings(); refreshUI(); }
+
+  function playClap(){
+    if(cfg.soundPack==="silent") return;
+    ensureAudio(); if(muted) return;
+    const now=ctx.currentTime;
+    const mult=parseInt(clapVolEl.value,10)/100;
+
+    function burst(t, amp){
+      const buffer=ctx.createBuffer(1, ctx.sampleRate*0.05, ctx.sampleRate);
+      const data=buffer.getChannelData(0);
+      for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length);
+      const src=ctx.createBufferSource(); src.buffer=buffer;
+      const hp=ctx.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=900;
+      const g=ctx.createGain();
+      g.gain.setValueAtTime(amp*mult, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t+0.05);
+      src.connect(hp); hp.connect(g); g.connect(master);
+      src.start(t);
+    }
+    burst(now, 2.8); burst(now+0.015, 1.9); burst(now+0.03, 1.2);
+  }
+
+  function playBeep(freq=950, dur=0.09){
+    if(cfg.soundPack==="silent") return;
+    ensureAudio(); if(muted) return;
+    const now=ctx.currentTime;
+    const mult=parseInt(bellVolEl.value,10)/100;
+    const osc=ctx.createOscillator(); osc.type="sine"; osc.frequency.setValueAtTime(freq, now);
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(1.1*mult, now+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+dur);
+    osc.connect(g); g.connect(master);
+    osc.start(now); osc.stop(now+dur+0.02);
+  }
+
+  function bellSingle(){
+    if(cfg.soundPack==="silent") return;
+    if(cfg.soundPack==="modern"){ playBeep(780,0.12); return; }
+    ensureAudio(); if(muted) return;
+    const now=ctx.currentTime;
+    const mult=parseInt(bellVolEl.value,10)/100;
+
+    const env=ctx.createGain();
+    env.gain.setValueAtTime(0.0001, now);
+    env.gain.exponentialRampToValueAtTime(2.0*mult, now+0.01);
+    env.gain.exponentialRampToValueAtTime(0.0001, now+2.2);
+    env.connect(master);
+
+    const partials=[900,1420,2100,2750,3400];
+    partials.forEach((f,i)=>{
+      const o=ctx.createOscillator(); o.type="triangle";
+      o.frequency.setValueAtTime(f, now);
+      o.frequency.exponentialRampToValueAtTime(f*0.985, now+2.1);
+      const g=ctx.createGain(); g.gain.value=(1.6/(i+1))*mult;
+      o.connect(g); g.connect(env);
+      o.start(now); o.stop(now+2.25);
+    });
+
+    const noise=ctx.createBuffer(1, ctx.sampleRate*0.03, ctx.sampleRate);
+    const d=noise.getChannelData(0);
+    for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+    const src=ctx.createBufferSource(); src.buffer=noise;
+    const g=ctx.createGain(); g.gain.value=1.5*mult;
+    src.connect(g); g.connect(env); src.start(now);
+  }
+
+  function bellLong(){
+    if(cfg.soundPack==="silent") return;
+    if(cfg.soundPack==="modern"){ playBeep(650,0.2); setTimeout(()=>playBeep(650,0.2),240); return; }
+    ensureAudio(); if(muted) return;
+    const now=ctx.currentTime;
+    const mult=parseInt(bellVolEl.value,10)/100;
+    const env=ctx.createGain();
+    env.gain.setValueAtTime(0.0001, now);
+    env.gain.exponentialRampToValueAtTime(2.4*mult, now+0.01);
+    env.gain.exponentialRampToValueAtTime(0.0001, now+4.2);
+    env.connect(master);
+
+    const partials=[860,1320,1980,2600,3200];
+    partials.forEach((f,i)=>{
+      const o=ctx.createOscillator(); o.type="triangle";
+      o.frequency.setValueAtTime(f, now);
+      o.frequency.exponentialRampToValueAtTime(f*0.992, now+4.0);
+      const g=ctx.createGain(); g.gain.value=(1.8/(i+1))*mult;
+      o.connect(g); g.connect(env);
+      o.start(now); o.stop(now+4.3);
+    });
+  }
+
+  function triple(fn,gap){ fn(); setTimeout(fn,gap); setTimeout(fn,gap*2); }
+
+  function doWarning10(){
+    flash();
+    if(cfg.soundPack==="modern"){
+      for(let i=0;i<10;i++) setTimeout(()=>playBeep(980,0.08), i*220);
+      return;
+    }
+    const p=warnPatternEl.value;
+    if(p==="claps3") triple(playClap,520);
+    else if(p==="beeps10") for(let i=0;i<10;i++) setTimeout(()=>playBeep(950,0.08), i*220);
+    else if(p==="beeps3") triple(()=>playBeep(950,0.11),520);
+  }
+
+  function doEnd(){
+    flash();
+    if(cfg.soundPack==="modern"){ triple(()=>playBeep(720,0.12), 520); return; }
+    const p=endPatternEl.value;
+    if(p==="bell3") triple(bellSingle,750);
+    else bellLong();
+  }
+
+  function cueTick(){
+    if(cfg.soundPack==="silent") return;
+    if(cfg.soundPack==="modern"){ playBeep(880,0.06); return; }
+    playBeep(880,0.06);
+  }
+
+  function testClap(){ triple(playClap,520); }
+  function testBell(){ triple(bellSingle,750); }
+  function testBeep(){ triple(()=>playBeep(950,0.11),520); }
+
+  function toggleAmbience(){
+    cfg.ambience = !cfg.ambience;
+    if(!cfg.ambience) stopAmbience();
+    else startAmbience();
+    saveSettings(); refreshUI();
+  }
+
+  function startAmbience(){
+    if(cfg.soundPack==="silent") return;
+    ensureAudio(); if(muted) return;
+    stopAmbience();
+    // subtle filtered noise as "room hum"
+    const buffer=ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){
+      data[i]=(Math.random()*2-1)*0.15;
+    }
+    const src=ctx.createBufferSource();
+    src.buffer=buffer;
+    src.loop=true;
+
+    const lp=ctx.createBiquadFilter();
+    lp.type="lowpass";
+    lp.frequency.value=420;
+
+    const hp=ctx.createBiquadFilter();
+    hp.type="highpass";
+    hp.frequency.value=60;
+
+    const g=ctx.createGain();
+    g.gain.value=0.12;
+
+    src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(master);
+    src.start();
+    ambienceNode={src,g};
+  }
+  function stopAmbience(){
+    try{
+      if(ambienceNode?.src){
+        ambienceNode.src.stop();
+      }
+    }catch{}
+    ambienceNode=null;
+  }
+
+  /* ========= TTS ========= */
+  function speak(text){
+    if(!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.0;
+      u.pitch = 1.1;
+      u.volume = 1.0;
+      window.speechSynthesis.speak(u);
+    }catch{}
+  }
+
+  function toggleTTSSteps(){
+    cfg.announceSteps = !cfg.announceSteps;
+    saveSettings(); refreshUI();
+  }
+  function toggleTTSCallouts(){
+    cfg.calloutVoice = !cfg.calloutVoice;
+    saveSettings(); refreshUI();
+  }
+
+  /* ========= MODE -> SEQUENCE ========= */
+  function expandBlocks(blocks){
+    const out=[];
+    for(const b of blocks){
+      const rep=Math.max(1, clampInt(b.repeat,1,999,1));
+      for(let i=0;i<rep;i++){
+        out.push({ type:b.type, label:(b.label||b.type.toUpperCase()), seconds:clampInt(b.seconds,0,36000,0) });
+      }
+    }
+    if(out.length===0) out.push({type:"note", label:"No steps", seconds:0});
+    return out;
+  }
+
+  let seqBlocks=[];
+
+  function buildSequenceFromMode(){
+    const mode=cfg.mode;
+
+    if(mode==="standard"){
+      const rounds=clampInt(roundsEl.value,1,99,5);
+      const rt=clampInt(roundTimeEl.value,1,3600,180);
+      const rest=clampInt(restTimeEl.value,0,3600,60);
+      const wu=clampInt(warmupEl.value,0,3600,0);
+      const cd=clampInt(cooldownEl.value,0,3600,0);
+
+      const blocks=[];
+      if(wu>0) blocks.push({type:"warmup",label:"Warmup",seconds:wu,repeat:1});
+      for(let i=1;i<=rounds;i++){
+        blocks.push({type:"fight",label:`Round ${i}`,seconds:rt,repeat:1});
+        if(i<rounds && rest>0) blocks.push({type:"rest",label:`Rest`,seconds:rest,repeat:1});
+      }
+      if(cd>0) blocks.push({type:"cooldown",label:"Cooldown",seconds:cd,repeat:1});
+      return expandBlocks(blocks);
+    }
+
+    if(mode==="emom"){
+      const mins=clampInt(emomMinutesEl.value,1,180,10);
+      const w=clampInt(emomWorkEl.value,1,60,45);
+      const r=clampInt(emomRestEl.value,0,60,15);
+      const blocks=[];
+      for(let i=1;i<=mins;i++){
+        blocks.push({type:"fight",label:`EMOM ${i} Work`,seconds:w,repeat:1});
+        if(r>0) blocks.push({type:"rest",label:`EMOM ${i} Rest`,seconds:r,repeat:1});
+      }
+      return expandBlocks(blocks);
+    }
+
+    if(mode==="tabata"){
+      const c=clampInt(tabCyclesEl.value,1,50,8);
+      const w=clampInt(tabWorkEl.value,1,300,20);
+      const r=clampInt(tabRestEl.value,0,300,10);
+      const blocks=[];
+      for(let i=1;i<=c;i++){
+        blocks.push({type:"fight",label:`Tabata ${i} Work`,seconds:w,repeat:1});
+        if(r>0) blocks.push({type:"rest",label:`Tabata ${i} Rest`,seconds:r,repeat:1});
+      }
+      return expandBlocks(blocks);
+    }
+
+    if(mode==="hiit"){
+      const reps=clampInt(hiitRepeatsEl.value,1,200,10);
+      const w=clampInt(hiitWorkEl.value,1,3600,30);
+      const r=clampInt(hiitRestEl.value,0,3600,30);
+      const blocks=[];
+      for(let i=1;i<=reps;i++){
+        blocks.push({type:"fight",label:`HIIT ${i} Work`,seconds:w,repeat:1});
+        if(r>0) blocks.push({type:"rest",label:`HIIT ${i} Rest`,seconds:r,repeat:1});
+      }
+      return expandBlocks(blocks);
+    }
+
+    if(mode==="sequence"){
+      return expandBlocks(seqBlocks);
+    }
+
+    return expandBlocks([{type:"note",label:"Unknown mode",seconds:0,repeat:1}]);
+  }
+
+  function showModeCards(){
+    standardCard.style.display = cfg.mode==="standard" ? "" : "none";
+    emomCard.style.display     = cfg.mode==="emom" ? "" : "none";
+    tabataCard.style.display   = cfg.mode==="tabata" ? "" : "none";
+    hiitCard.style.display     = cfg.mode==="hiit" ? "" : "none";
+    sequenceCard.style.display = cfg.mode==="sequence" ? "" : "none";
+  }
+
+  modeSel.addEventListener("change", ()=>{
+    if(running) return;
+    cfg.mode=modeSel.value;
+    showModeCards();
+    rebuildFromMode();
+    saveSettings();
+  });
+
+  function rebuildFromMode(){
+    if(running) return;
+    sequence = buildSequenceFromMode();
+    stepIndex=0;
+    const step=sequence[0];
+    timeLeft = step ? step.seconds : 0;
+    stepDuration = Math.max(1,timeLeft || 1);
+    stepFlags={ warned10:false };
+    undoStack=[];
+    lastCalloutAt=-99999;
+    lastTempoAt=-99999;
+    lastTargetAt=-99999;
+    calloutText.textContent = cfg.calloutsOn ? "Ready" : "Off";
+    refreshUI();
+    saveSettings();
+  }
+
+  /* ========= SEQUENCE BUILDER ========= */
+  function renderSeq(){
+    if(cfg.mode!=="sequence"){ seqListEl.innerHTML=""; return; }
+    if(seqBlocks.length===0){
+      seqListEl.innerHTML = `<div class="tiny" style="margin-top:8px;">No blocks yet. Add some above.</div>`;
+      return;
+    }
+    seqListEl.innerHTML = seqBlocks.map((b,idx)=>{
+      const secs = clampInt(b.seconds,0,36000,0);
+      const rep = clampInt(b.repeat,1,999,1);
+      const desc = `${b.type.toUpperCase()} · ${secs?formatTime(secs):"00:00"} · x${rep}`;
+      return `
+        <div class="item">
+          <div class="itemLeft">
+            <div class="itemName">${esc(b.label||"")}</div>
+            <div class="itemDesc">${esc(desc)}</div>
+          </div>
+          <div class="itemBtns">
+            <button class="updown" onclick="moveBlock(${idx},-1)">↑</button>
+            <button class="updown" onclick="moveBlock(${idx},1)">↓</button>
+            <button onclick="dupBlock(${idx})">Dup</button>
+            <button class="del" onclick="delBlock(${idx})">Del</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function addSeqBlock(){
+    const type=seqTypeEl.value;
+    const label=(seqLabelEl.value||"").trim() || (type==="fight"?"Round":type==="rest"?"Rest":type==="warmup"?"Warmup":type==="cooldown"?"Cooldown":"Note");
+    const seconds=clampInt(seqSecEl.value,0,36000, type==="note"?0:180);
+    const repeat=clampInt(seqRepEl.value,1,999,1);
+    seqBlocks.push({type,label,seconds,repeat});
+    seqLabelEl.value="";
+    saveSettings();
+    renderSeq();
+    rebuildFromMode();
+  }
+  function moveBlock(i,dir){
+    const j=i+dir; if(j<0||j>=seqBlocks.length) return;
+    const tmp=seqBlocks[i]; seqBlocks[i]=seqBlocks[j]; seqBlocks[j]=tmp;
+    saveSettings(); renderSeq(); rebuildFromMode();
+  }
+  function delBlock(i){ seqBlocks.splice(i,1); saveSettings(); renderSeq(); rebuildFromMode(); }
+  function dupBlock(i){ const b=seqBlocks[i]; if(!b) return; seqBlocks.splice(i+1,0,{...b}); saveSettings(); renderSeq(); rebuildFromMode(); }
+  function clearSequence(){ seqBlocks=[]; saveSettings(); renderSeq(); rebuildFromMode(); }
+
+  /* ========= CALLOUTS ========= */
+  function toggleCallouts(){
+    cfg.calloutsOn = !cfg.calloutsOn;
+    calloutOnBtn.textContent = cfg.calloutsOn ? "On" : "Off";
+    calloutText.textContent = cfg.calloutsOn ? "Ready" : "Off";
+    saveSettings(); refreshUI();
+  }
+  function setCallout(text){
+    calloutText.textContent = text;
+    logFeed("Callout", `${text} (${cfg.bagType})`);
+    if(cfg.calloutVoice) speak(text.replaceAll("–"," "));
+  }
+  function pickRandom(arr){
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+  function maybeCallout(step, tNow){
+    if(!cfg.calloutsOn) return;
+    if(!(step?.type==="fight")) return;
+    const every = clampInt(calloutEveryEl.value,3,60,10);
+    if(tNow - lastCalloutAt < every) return;
+    lastCalloutAt = tNow;
+
+    const bank = COMBOS[cfg.bagType] || COMBOS.heavy;
+    const combo = pickRandom(bank);
+    setCallout(combo);
+  }
+
+  /* ========= TEMPO ========= */
+  function toggleTempo(){
+    cfg.tempoOn = !cfg.tempoOn;
+    tempoOnBtn.textContent = cfg.tempoOn ? "On" : "Off";
+    saveSettings(); refreshUI();
+  }
+  function maybeTempo(step, tNow){
+    if(!cfg.tempoOn) return;
+    if(!(step?.type==="fight")) return;
+
+    const tickEvery = clampInt(tempoEveryEl.value,1,30,5);
+    if(tNow - lastTempoAt >= tickEvery){
+      lastTempoAt = tNow;
+      cueTick();
+    }
+
+    const target = clampInt(punchTargetEl.value,0,200,0);
+    if(target > 0){
+      // every 10 seconds cue a mini target
+      if(tNow - lastTargetAt >= 10){
+        lastTargetAt = tNow;
+        const per10 = Math.max(1, Math.round(target / 6)); // 60/10 = 6
+        flash();
+        logFeed("Tempo Target", `Throw ~${per10} punches now`);
+        if(cfg.calloutVoice) speak(`${per10} punches`);
+      }
+    }
+  }
+
+  /* ========= CORNER MODE ========= */
+  function toggleCorner(){
+    cornerEnabled = !cornerEnabled;
+    cornerOnBtn.textContent = cornerEnabled ? "On" : "Off";
+    saveSettings(); refreshUI();
+  }
+  function toggleCornerDock(){
+    cornerDockEnabled = !cornerDockEnabled;
+    cornerDockBtn.textContent = cornerDockEnabled ? "On" : "Off";
+    document.body.classList.toggle("cornerDockOn", cornerDockEnabled);
+    saveSettings(); refreshUI();
+  }
+
+  function currentStepLabel(){
+    const s=sequence[stepIndex];
+    return s ? (s.label || s.type) : "—";
+  }
+  function cornerEvent(type){
+    if(!cornerEnabled) return;
+    const ev = {
+      t: Date.now(),
+      type,
+      stepIndex,
+      stepLabel: currentStepLabel(),
+      timeLeft
+    };
+    cornerTimeline.push(ev);
+    logFeed("Corner", `${type} @ ${ev.stepLabel} (${formatTime(Math.max(0,ev.timeLeft))} left)`);
+    flash();
+    vibe(25);
+
+    if(type === "NOTE"){
+      const note = prompt("Quick note:");
+      if(note && note.trim()){
+        cornerTimeline.push({ ...ev, type:"NOTE", note: note.trim() });
+        logFeed("Corner Note", note.trim());
+      }
+    }
+  }
+
+  function openCornerLog(){
+    if(cornerTimeline.length===0){
+      alert("No corner events yet.");
+      return;
+    }
+    const lines = cornerTimeline.map(e=>{
+      const t = new Date(e.t).toLocaleTimeString();
+      const n = e.note ? ` - ${e.note}` : "";
+      return `${t} | ${e.type} | ${e.stepLabel} | ${formatTime(Math.max(0,e.timeLeft))} left${n}`;
+    }).join("\n");
+    alert(lines);
+  }
+  function clearCornerLog(){
+    cornerTimeline=[];
+    alert("Corner timeline cleared.");
+  }
+
+  /* ========= ADAPTIVE REST ========= */
+  function toggleFlash(){ cfg.flash=!cfg.flash; saveSettings(); refreshUI(); }
+  function toggleAdaptive(){ cfg.adaptive=!cfg.adaptive; saveSettings(); refreshUI(); }
+
+  function applyAdaptiveRestToStep(step){
+    if(!cfg.adaptive) return step.seconds;
+    if(step.type!=="rest") return step.seconds;
+    // apply rule once per rest step based on pausesThisSession
+    const rule = adaptRuleEl.value || cfg.adaptRule;
+    let sec = step.seconds;
+
+    if(rule==="pause2_add15" && pausesThisSession>=2) sec += 15;
+    if(rule==="pause3_add30" && pausesThisSession>=3) sec += 30;
+    if(rule==="nopause_trim5" && pausesThisSession===0) sec = Math.max(0, sec - 5);
+
+    return sec;
+  }
+
+  /* ========= UI/CONTROLS ========= */
+  function openIfWide(){
+    // if wide screen, show side panel
+    // it's already CSS-gated; wrap class toggles split grid.
+    // split turns on when feed logs.
+  }
+
+  function setPhaseUI(){
+    phasePill.classList.remove("fight","rest","warn","end");
+    const step=sequence[stepIndex];
+    if(!running){ phasePill.textContent="READY"; phasePill.classList.add("fight"); document.body.classList.remove("pulse"); return; }
+    if(!step){ phasePill.textContent="DONE"; phasePill.classList.add("fight"); document.body.classList.remove("pulse"); return; }
+
+    if(step.type==="note"){
+      phasePill.textContent="NOTE";
+      phasePill.classList.add("warn");
+      document.body.classList.remove("pulse");
+      return;
+    }
+
+    if(step.type==="rest"){
+      phasePill.textContent="REST";
+      phasePill.classList.add("rest");
+      document.body.classList.remove("pulse");
+      return;
+    }
+
+    const label = step.type==="warmup" ? "WARMUP" : step.type==="cooldown" ? "COOLDOWN" : "FIGHT";
+    phasePill.textContent = label;
+
+    if(timeLeft<=3){ phasePill.classList.add("end"); document.body.classList.add("pulse"); }
+    else if(timeLeft<=10 && (step.type==="fight")){ phasePill.classList.add("warn"); document.body.classList.add("pulse"); }
+    else { phasePill.classList.add("fight"); document.body.classList.remove("pulse"); }
+  }
+
+  function setColors(){
+    const step=sequence[stepIndex];
+    if(!running || !step){
+      timerEl.style.color="var(--fight)";
+      progressFill.style.background="var(--fight)";
+      return;
+    }
+    if(step.type==="rest"){ timerEl.style.color="var(--rest)"; progressFill.style.background="var(--rest)"; return; }
+    if(step.type==="note"){ timerEl.style.color="var(--warn)"; progressFill.style.background="var(--warn)"; return; }
+    if(timeLeft<=3){ timerEl.style.color="var(--end)"; progressFill.style.background="var(--end)"; }
+    else if(timeLeft<=10 && step.type==="fight"){ timerEl.style.color="var(--warn)"; progressFill.style.background="var(--warn)"; }
+    else { timerEl.style.color="var(--fight)"; progressFill.style.background="var(--fight)"; }
+  }
+
+  function updateProgress(){
+    const denom=Math.max(stepDuration,1);
+    const pct=Math.max(0,Math.min(100,(timeLeft/denom)*100));
+    progressFill.style.width=pct+"%";
+  }
+
+  function updateMeta(){
+    const total=Math.max(sequence.length,1);
+    roundMeta.textContent=`Step ${Math.min(stepIndex+1,total)}/${total}`;
+    const step=sequence[stepIndex];
+    const label=step ? (step.label||step.type) : "Done";
+    timeMeta.textContent=`${label}: ${formatTime(Math.max(0,timeLeft))}`;
+  }
+
+  function refreshUI(){
+    timerEl.textContent = formatTime(Math.max(0,timeLeft));
+    updateMeta(); setPhaseUI(); setColors(); updateProgress();
+
+    startBtn.textContent = running ? "Running" : "Start";
+    pauseBtn.textContent = running ? "Pause" : "Paused";
+
+    minBtn.textContent = cfg.minimal ? "Minimal: On" : "Minimal: Off";
+    ultraBtn.textContent = cfg.ultraminimal ? "Ultra: On" : "Ultra: Off";
+    lockBtn.textContent = cfg.locked ? "Lock: On" : "Lock: Off";
+    gymBtn.textContent  = cfg.gymmode ? "Gym Mode: On" : "Gym Mode: Off";
+
+    muteBtn.textContent = muted ? "On" : "Off";
+    volLabel.textContent = `${volEl.value}%`;
+    clapLabel.textContent = `${clapVolEl.value}%`;
+    bellLabel.textContent = `${bellVolEl.value}%`;
+
+    calloutOnBtn.textContent = cfg.calloutsOn ? "On" : "Off";
+    tempoOnBtn.textContent   = cfg.tempoOn ? "On" : "Off";
+    ttsCalloutBtn.textContent= cfg.calloutVoice ? "On" : "Off";
+
+    cornerOnBtn.textContent = cornerEnabled ? "On" : "Off";
+    cornerDockBtn.textContent = cornerDockEnabled ? "On" : "Off";
+
+    flashBtn.textContent = cfg.flash ? "On" : "Off";
+    adaptBtn.textContent = cfg.adaptive ? "On" : "Off";
+
+    ttsStepBtn.textContent = cfg.announceSteps ? "On" : "Off";
+    ambBtn.textContent = cfg.ambience ? "On" : "Off";
+
+    shakeBtn.textContent = shakeEnabled ? "On" : "Off";
+
+    wakeBtn.textContent = cfg.wake ? "On" : "Off";
+    vibeBtn.textContent = cfg.vibe ? "On" : "Off";
+
+    proBtn.textContent = cfg.pro ? "On" : "Off";
+    adbar.style.display = cfg.pro ? "none" : "block";
+
+    document.body.classList.toggle("minimal", cfg.minimal);
+    document.body.classList.toggle("ultraminimal", cfg.ultraminimal);
+    document.body.classList.toggle("locked", cfg.locked);
+    document.body.classList.toggle("gymmode", cfg.gymmode);
+    document.body.classList.toggle("cornerDockOn", cornerDockEnabled);
+
+    // callout box visibility
+    calloutBox.style.display = cfg.calloutsOn ? "" : "none";
+  }
+
+  function toggleMinimal(){ cfg.minimal=!cfg.minimal; saveSettings(); refreshUI(); }
+  function toggleUltraMinimal(){ cfg.ultraminimal=!cfg.ultraminimal; saveSettings(); refreshUI(); }
+  function toggleLock(){ cfg.locked=!cfg.locked; saveSettings(); refreshUI(); }
+  function toggleGymMode(){ cfg.gymmode=!cfg.gymmode; saveSettings(); refreshUI(); }
+
+  async function toggleFullscreen(){
+    try{
+      if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    }catch{}
+  }
+  document.addEventListener("fullscreenchange", ()=>{
+    const isFs=!!document.fullscreenElement;
+    document.body.classList.toggle("fullscreen", isFs);
+    fsBtn.textContent = isFs ? "Exit Fullscreen" : "Fullscreen";
+  });
+
+  function pushUndo(){
+    undoStack.push({
+      sequence: JSON.parse(JSON.stringify(sequence)),
+      seqBlocks: JSON.parse(JSON.stringify(seqBlocks)),
+      idx: stepIndex,
+      timeLeft, stepDuration,
+      flags: {...stepFlags},
+      lastCalloutAt, lastTempoAt, lastTargetAt
+    });
+    if(undoStack.length>30) undoStack.shift();
+  }
+  function undoSkip(){
+    const prev=undoStack.pop();
+    if(!prev) return;
+    sequence=prev.sequence;
+    seqBlocks=prev.seqBlocks;
+    stepIndex=prev.idx;
+    timeLeft=prev.timeLeft;
+    stepDuration=prev.stepDuration;
+    stepFlags=prev.flags;
+    lastCalloutAt=prev.lastCalloutAt;
+    lastTempoAt=prev.lastTempoAt;
+    lastTargetAt=prev.lastTargetAt;
+    refreshUI();
+    saveSettings();
+  }
+
+  function addRest10(){
+    const step=sequence[stepIndex];
+    if(!running || !step) return;
+    if(step.type!=="rest") return;
+    timeLeft += 10;
+    stepDuration += 10;
+    flash();
+    refreshUI();
+  }
+
+  function skipStep(){
+    if(!running) return;
+    pushUndo();
+    nextStep(true);
+  }
+
+  /* ========= TAP + UNLOCK ========= */
+  let tapTimes=[];
+  timerEl.addEventListener("click", ()=>{
+    ensureAudio();
+    if(cfg.locked){
+      const now=Date.now();
+      tapTimes = tapTimes.filter(t=> now - t < 700);
+      tapTimes.push(now);
+      if(tapTimes.length>=3){
+        cfg.locked=false;
+        tapTimes=[];
+        saveSettings(); refreshUI();
+      }
+      return;
+    }
+    toggleStartPause();
+  });
+
+  /* ========= SWIPES ========= */
+  let sx=0,sy=0,st=0;
+  timerEl.addEventListener("pointerdown",(e)=>{ sx=e.clientX; sy=e.clientY; st=Date.now(); });
+  timerEl.addEventListener("pointerup",(e)=>{
+    if(cfg.locked) return;
+    const dx=e.clientX-sx, dy=e.clientY-sy, dt=Date.now()-st;
+    if(dt>700) return;
+    const ax=Math.abs(dx), ay=Math.abs(dy);
+    if(ax<60 && ay<60) return;
+
+    if(ax>ay){
+      if(!running) return;
+      timeLeft = Math.max(0, timeLeft + (dx>0 ? 10 : -10));
+      refreshUI();
+    }else{
+      volEl.value = clampInt(parseInt(volEl.value,10)+(dy<0?5:-5),0,100,90);
+      applyVolumes(); refreshUI(); saveSettings();
+    }
+  });
+
+  /* ========= KEYBOARD ========= */
+  function isTypingTarget(el){
+    if(!el) return false;
+    const tag=(el.tagName||"").toLowerCase();
+    return tag==="input"||tag==="textarea"||tag==="select"||el.isContentEditable;
+  }
+  document.addEventListener("keydown",(e)=>{
+    if(isTypingTarget(document.activeElement)) return;
+
+    if(e.code==="Escape"){ if(drawer.classList.contains("open")) closeSettings(); return; }
+    if(e.code==="KeyS"){ e.preventDefault(); openSettings(); return; }
+    if(e.code==="Space"){ e.preventDefault(); if(!cfg.locked) toggleStartPause(); return; }
+    if(e.code==="KeyR"){ e.preventDefault(); if(!cfg.locked) reset(); return; }
+    if(e.code==="KeyF"){ e.preventDefault(); toggleFullscreen(); return; }
+    if(e.code==="ArrowUp"){
+      e.preventDefault(); volEl.value = clampInt(parseInt(volEl.value,10)+5,0,100,90); applyVolumes(); refreshUI(); saveSettings(); return;
+    }
+    if(e.code==="ArrowDown"){
+      e.preventDefault(); volEl.value = clampInt(parseInt(volEl.value,10)-5,0,100,90); applyVolumes(); refreshUI(); saveSettings(); return;
+    }
+  });
+
+  /* ========= WAKE LOCK ========= */
+  async function requestWake(){
+    if(!cfg.wake) return;
+    try{
+      if("wakeLock" in navigator){
+        wakeLock = await navigator.wakeLock.request("screen");
+      }
+    }catch{}
+  }
+  async function releaseWake(){
+    try{ if(wakeLock){ await wakeLock.release(); wakeLock=null; } }catch{}
+  }
+  function toggleWake(){ cfg.wake=!cfg.wake; if(!cfg.wake) releaseWake(); saveSettings(); refreshUI(); }
+  function toggleVibe(){ cfg.vibe=!cfg.vibe; saveSettings(); refreshUI(); }
+
+  /* ========= SHAKE TO PAUSE ========= */
+  function toggleShake(){
+    shakeEnabled=!shakeEnabled;
+    saveSettings(); refreshUI();
+  }
+  window.addEventListener("devicemotion",(e)=>{
+    if(!shakeEnabled) return;
+    if(!running) return;
+
+    const now=Date.now();
+    if(now - lastShakeAt < 900) return;
+
+    const a = e.accelerationIncludingGravity;
+    if(!a) return;
+    const mag = Math.sqrt((a.x||0)**2 + (a.y||0)**2 + (a.z||0)**2);
+
+    // Typical gravity ~9.8. A shake spike usually > 18-22 on phones.
+    if(mag > 20){
+      lastShakeAt = now;
+      pause();
+      logFeed("Safety", "Shake paused timer");
+      flash();
+      vibe([40,80,40]);
+    }
+  });
+
+  /* ========= ENGINE ========= */
+  function toggleStartPause(){ if(running) pause(); else start(); }
+
+  function onStepStart(step){
+    stepFlags={ warned10:false };
+    if(!step) return;
+
+    if(step.type==="note"){
+      timeLeft=0; stepDuration=1;
+      refreshUI();
+      setTimeout(()=>{ if(running) nextStep(false); }, 200);
+      return;
+    }
+
+    // adaptive rest applied here
+    let sec = step.seconds;
+    if(step.type==="rest") sec = applyAdaptiveRestToStep(step);
+
+    timeLeft = Math.max(0, sec);
+    stepDuration = Math.max(1, timeLeft);
+
+    if(cfg.announceSteps){
+      const spoken = (step.type==="rest" ? "Rest" : step.label || "Work");
+      speak(spoken);
+    }
+
+    // optional ambience
+    if(cfg.ambience) startAmbience();
+
+    refreshUI();
+  }
+
+  function nextStep(manualSkip=false){
+    const prev=sequence[stepIndex];
+    if(prev && prev.type!=="note"){
+      doEnd();
+      vibe([120,200,120]);
+    }
+
+    stepIndex++;
+    if(stepIndex>=sequence.length){
+      finishWorkout();
+      return;
+    }
+
+    const step=sequence[stepIndex];
+    onStepStart(step);
+    if(manualSkip) flash();
+  }
+
+  function tickLoop(){
+    const step=sequence[stepIndex];
+    if(!step) return;
+
+    // timers
+    if(step.type!=="note"){
+      timeLeft--;
+    }
+
+    // 10s warning only for fight/work steps
+    if(step.type==="fight" && timeLeft===10 && !stepFlags.warned10){
+      stepFlags.warned10=true;
+      doWarning10();
+      vibe([60,120,60,120,60]);
+      if(cfg.announceSteps) speak("10 seconds");
+    }
+
+    // callouts & tempo
+    const tNow = sessionActiveSeconds;
+    maybeCallout(step, tNow);
+    maybeTempo(step, tNow);
+
+    refreshUI();
+
+    if(step.type!=="note" && timeLeft<=0){
+      nextStep(false);
+    }
+  }
+
+  function start(){
+    if(running) return;
+
+    ensureAudio();
+    if(cfg.wake) requestWake();
+    if(cfg.ambience) startAmbience();
+
+    if(!sequence || sequence.length===0) rebuildFromMode();
+
+    running=true;
+    pauseCount=0;
+    pausesThisSession=0;
+    sessionActiveSeconds=0;
+    sessionStartTs=Date.now();
+    cornerTimeline=[]; // new session timeline
+
+    // apply bag type + callout every from controls
+    cfg.bagType = bagTypeEl.value;
+    cfg.calloutEvery = clampInt(calloutEveryEl.value,3,60,10);
+    cfg.tempoEvery = clampInt(tempoEveryEl.value,1,30,5);
+    cfg.punchTargetPerMin = clampInt(punchTargetEl.value,0,200,0);
+
+    onStepStart(sequence[stepIndex]);
+    interval=setInterval(()=>{
+      sessionActiveSeconds++;
+      tickLoop();
+    },1000);
+  }
+
+  function pause(){
+    clearInterval(interval); interval=null;
+    running=false;
+    document.body.classList.remove("pulse");
+
+    pauseCount++;
+    pausesThisSession++;
+
+    phasePill.textContent="PAUSED";
+    phasePill.classList.remove("fight","rest","warn","end");
+    phasePill.classList.add("warn");
+
+    stopAmbience();
+    releaseWake();
+    refreshUI();
+  }
+
+  function reset(){
+    clearInterval(interval); interval=null;
+    running=false;
+    document.body.classList.remove("pulse");
+    stopAmbience();
+    releaseWake();
+
+    stepIndex=0;
+    sequence = buildSequenceFromMode();
+    timeLeft = sequence[0] ? sequence[0].seconds : 0;
+    stepDuration = Math.max(1,timeLeft||1);
+
+    undoStack=[];
+    lastCalloutAt=-99999;
+    lastTempoAt=-99999;
+    lastTargetAt=-99999;
+
+    calloutText.textContent = cfg.calloutsOn ? "Ready" : "Off";
+    refreshUI();
+  }
+
+  function finishWorkout(){
+    clearInterval(interval); interval=null;
+    running=false;
+    stopAmbience();
+    releaseWake();
+    document.body.classList.remove("pulse");
+
+    phasePill.textContent="DONE";
+    timerEl.textContent="00:00";
+    progressFill.style.width="0%";
+    timeMeta.textContent="Workout Complete 💪";
+    roundMeta.textContent=`Step ${sequence.length}/${sequence.length}`;
+    flash();
+
+    saveHistoryEntry();
+    updatePBs();
+    refreshUI();
+  }
+
+  /* ========= HISTORY + PBs ========= */
+  function getHistory(){
+    const raw=localStorage.getItem(HISTORY_KEY);
+    const arr=raw?safeParse(raw):null;
+    return Array.isArray(arr)?arr:[];
+  }
+  function setHistory(arr){ localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); }
+
+  function getPBs(){
+    const raw=localStorage.getItem(PB_KEY);
+    const p=raw?safeParse(raw):null;
+    return p && typeof p==="object" ? p : { sessions:0, totalActive:0, bestNoPause:0 };
+  }
+  function setPBs(p){ localStorage.setItem(PB_KEY, JSON.stringify(p)); }
+
+  function describeWorkout(){
+    if(cfg.mode==="standard"){
+      return `${roundsEl.value}x${formatTime(clampInt(roundTimeEl.value,1,3600,180))} / rest ${formatTime(clampInt(restTimeEl.value,0,3600,60))}`;
+    }
+    if(cfg.mode==="tabata"){
+      return `Tabata ${tabCyclesEl.value}×(${tabWorkEl.value}/${tabRestEl.value})`;
+    }
+    if(cfg.mode==="emom"){
+      return `EMOM ${emomMinutesEl.value}m (work ${emomWorkEl.value}s)`;
+    }
+    if(cfg.mode==="hiit"){
+      return `HIIT ${hiitRepeatsEl.value}×(${hiitWorkEl.value}/${hiitRestEl.value})`;
+    }
+    return `Sequence (${sequence.length} steps)`;
+  }
+
+  function saveHistoryEntry(){
+    const arr=getHistory();
+    arr.unshift({
+      savedAt: Date.now(),
+      mode: cfg.mode,
+      summary: describeWorkout(),
+      activeSeconds: sessionActiveSeconds,
+      pauses: pausesThisSession,
+      bagType: cfg.bagType,
+      calloutsOn: cfg.calloutsOn,
+      tempoOn: cfg.tempoOn,
+      cornerTimeline: cornerEnabled ? cornerTimeline : []
+    });
+    setHistory(arr.slice(0, 50));
+  }
+
+  function updatePBs(){
+    const p=getPBs();
+    p.sessions = (p.sessions||0) + 1;
+    p.totalActive = (p.totalActive||0) + sessionActiveSeconds;
+    if(pausesThisSession===0){
+      p.bestNoPause = Math.max(p.bestNoPause||0, sessionActiveSeconds);
+    }
+    setPBs(p);
+    updatePBUI();
+  }
+
+  function updatePBUI(){
+    const p=getPBs();
+    pbNoPauseEl.textContent = p.bestNoPause ? formatTime(p.bestNoPause) : "—";
+    pbSessionsEl.textContent = String(p.sessions||0);
+    pbTimeEl.textContent = formatTime(p.totalActive||0);
+  }
+
+  /* ========= SHARE CARD ========= */
+  function downloadShareCard(){
+    const summary = describeWorkout();
+    const p=getPBs();
+    const paused = pausesThisSession;
+
+    const canvas=document.createElement("canvas");
+    const w=1080, h=1080;
+    canvas.width=w; canvas.height=h;
+    const c=canvas.getContext("2d");
+
+    // background
+    c.fillStyle="#0d0d0d";
+    c.fillRect(0,0,w,h);
+
+    // header
+    c.fillStyle="#ffffff";
+    c.font="900 72px Arial";
+    c.fillText("BOXING TIMER", 80, 140);
+
+    c.font="700 44px Arial";
+    c.fillStyle="#00ff88";
+    c.fillText("Workout Complete", 80, 220);
+
+    // card
+    c.fillStyle="#0b0b0b";
+    roundRect(c, 80, 280, 920, 600, 40);
+    c.fill();
+
+    c.strokeStyle="#232323";
+    c.lineWidth=6;
+    roundRect(c, 80, 280, 920, 600, 40);
+    c.stroke();
+
+    c.fillStyle="#ffffff";
+    c.font="900 56px Arial";
+    c.fillText(summary, 120, 380);
+
+    c.fillStyle="#bdbdbd";
+    c.font="700 38px Arial";
+    c.fillText(`Active Time: ${formatTime(sessionActiveSeconds)}`, 120, 470);
+    c.fillText(`Pauses: ${paused}`, 120, 530);
+    c.fillText(`Bag: ${cfg.bagType}`, 120, 590);
+    c.fillText(`Callouts: ${cfg.calloutsOn ? "On" : "Off"} · Tempo: ${cfg.tempoOn ? "On" : "Off"}`, 120, 650);
+
+    c.fillStyle="#ffffff";
+    c.font="900 42px Arial";
+    c.fillText(`PB (No Pause): ${p.bestNoPause ? formatTime(p.bestNoPause) : "—"}`, 120, 740);
+
+    c.fillStyle="#bdbdbd";
+    c.font="700 32px Arial";
+    c.fillText(new Date().toLocaleString(), 120, 820);
+
+    // export
+    const url=canvas.toDataURL("image/png");
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="boxing_timer_workout.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  /* ========= SHARE LINKS ========= */
+  function getSettingsObject(){
+    return {
+      cfg,
+      muted,
+      ui:{
+        rounds: roundsEl.value, roundTime: roundTimeEl.value, restTime: restTimeEl.value, warmup: warmupEl.value, cooldown: cooldownEl.value,
+        emomMinutes: emomMinutesEl.value, emomWork: emomWorkEl.value, emomRest: emomRestEl.value,
+        tabCycles: tabCyclesEl.value, tabWork: tabWorkEl.value, tabRest: tabRestEl.value,
+        hiitRepeats: hiitRepeatsEl.value, hiitWork: hiitWorkEl.value, hiitRest: hiitRestEl.value,
+        bagType: bagTypeEl.value, calloutEvery: calloutEveryEl.value,
+        tempoEvery: tempoEveryEl.value, punchTarget: punchTargetEl.value,
+        adaptRule: adaptRuleEl.value
+      },
+      sound:{
+        pack: soundPackEl.value,
+        vol: volEl.value, clapVol: clapVolEl.value, bellVol: bellVolEl.value,
+        warn: warnPatternEl.value, end: endPatternEl.value
+      },
+      seqBlocks
+    };
+  }
+
+  function applySettingsObject(obj, {save=true}={}){
+    if(!obj) return;
+    if(obj.cfg) cfg = {...cfg, ...obj.cfg};
+    if(typeof obj.muted==="boolean") muted=obj.muted;
+
+    if(obj.ui){
+      if(obj.ui.rounds!=null) roundsEl.value=obj.ui.rounds;
+      if(obj.ui.roundTime!=null) roundTimeEl.value=obj.ui.roundTime;
+      if(obj.ui.restTime!=null) restTimeEl.value=obj.ui.restTime;
+      if(obj.ui.warmup!=null) warmupEl.value=obj.ui.warmup;
+      if(obj.ui.cooldown!=null) cooldownEl.value=obj.ui.cooldown;
+
+      if(obj.ui.emomMinutes!=null) emomMinutesEl.value=obj.ui.emomMinutes;
+      if(obj.ui.emomWork!=null) emomWorkEl.value=obj.ui.emomWork;
+      if(obj.ui.emomRest!=null) emomRestEl.value=obj.ui.emomRest;
+
+      if(obj.ui.tabCycles!=null) tabCyclesEl.value=obj.ui.tabCycles;
+      if(obj.ui.tabWork!=null) tabWorkEl.value=obj.ui.tabWork;
+      if(obj.ui.tabRest!=null) tabRestEl.value=obj.ui.tabRest;
+
+      if(obj.ui.hiitRepeats!=null) hiitRepeatsEl.value=obj.ui.hiitRepeats;
+      if(obj.ui.hiitWork!=null) hiitWorkEl.value=obj.ui.hiitWork;
+      if(obj.ui.hiitRest!=null) hiitRestEl.value=obj.ui.hiitRest;
+
+      if(obj.ui.bagType!=null) bagTypeEl.value=obj.ui.bagType;
+      if(obj.ui.calloutEvery!=null) calloutEveryEl.value=obj.ui.calloutEvery;
+
+      if(obj.ui.tempoEvery!=null) tempoEveryEl.value=obj.ui.tempoEvery;
+      if(obj.ui.punchTarget!=null) punchTargetEl.value=obj.ui.punchTarget;
+
+      if(obj.ui.adaptRule!=null) adaptRuleEl.value=obj.ui.adaptRule;
+    }
+
+    if(obj.sound){
+      if(obj.sound.pack!=null) soundPackEl.value=obj.sound.pack;
+      if(obj.sound.vol!=null) volEl.value=obj.sound.vol;
+      if(obj.sound.clapVol!=null) clapVolEl.value=obj.sound.clapVol;
+      if(obj.sound.bellVol!=null) bellVolEl.value=obj.sound.bellVol;
+      if(obj.sound.warn!=null) warnPatternEl.value=obj.sound.warn;
+      if(obj.sound.end!=null) endPatternEl.value=obj.sound.end;
+    }
+
+    if(Array.isArray(obj.seqBlocks)) seqBlocks = obj.seqBlocks;
+
+    modeSel.value = cfg.mode;
+
+    cfg.soundPack = soundPackEl.value;
+    cfg.adaptRule = adaptRuleEl.value;
+
+    showModeCards();
+    applyVolumes();
+    refreshUI();
+
+    if(save) saveSettings();
+  }
+
+  function copyShareLink(workoutOnly){
+    const base = location.origin + location.pathname;
+    const payload = getSettingsObject();
+
+    const slim = workoutOnly ? {
+      cfg:{ ...payload.cfg, ambience:false },
+      ui: payload.ui,
+      sound: { pack: payload.sound.pack, warn: payload.sound.warn, end: payload.sound.end },
+      seqBlocks: payload.seqBlocks
+    } : payload;
+
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(slim))));
+    const url = `${base}?s=${encoded}`;
+
+    navigator.clipboard?.writeText?.(url);
+    shareNote.textContent = workoutOnly ? "Workout link copied ✅" : "Full share link copied ✅";
+    setTimeout(()=>shareNote.textContent="Share links include settings + sequence + library blocks.", 1500);
+  }
+
+  function applyFromUrl(){
+    const params=new URLSearchParams(location.search);
+    const s=params.get("s");
+    if(!s) return false;
+    try{
+      const json = decodeURIComponent(escape(atob(s)));
+      const obj = safeParse(json);
+      if(!obj) return false;
+      applySettingsObject(obj, {save:true});
+      rebuildFromMode();
+      shareNote.textContent="Loaded from share link ✅";
+      setTimeout(()=>shareNote.textContent="Share links include settings + sequence + library blocks.", 1500);
+      return true;
+    }catch{
+      return false;
+    }
+  }
+
+  /* ========= STORAGE ========= */
+  function saveSettings(){
+    const obj = getSettingsObject();
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(obj));
+  }
+  function loadSettings(){
+    const raw=localStorage.getItem(SETTINGS_KEY);
+    const obj=raw?safeParse(raw):null;
+    if(!obj) return;
+    applySettingsObject(obj, {save:false});
+  }
+  function resetSettings(){
+    localStorage.removeItem(SETTINGS_KEY);
+    localStorage.removeItem(HISTORY_KEY);
+    localStorage.removeItem(PB_KEY);
+    location.reload();
+  }
+
+  /* ========= LIBRARY UI ========= */
+  function initLibrary(){
+    librarySel.innerHTML = LIBRARY.map(w => `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join("");
+  }
+  function findLibrary(id){ return LIBRARY.find(x=>x.id===id); }
+  function loadLibraryWorkout(){
+    const w=findLibrary(librarySel.value);
+    if(!w) return;
+    seqBlocks = JSON.parse(JSON.stringify(w.blocks));
+    cfg.mode="sequence";
+    modeSel.value="sequence";
+    showModeCards();
+    renderSeq();
+    rebuildFromMode();
+    saveSettings();
+    alert("Loaded to Sequence Builder ✅");
+  }
+  function switchToSequenceMode(){
+    cfg.mode="sequence";
+    modeSel.value="sequence";
+    showModeCards();
+    renderSeq();
+    rebuildFromMode();
+    saveSettings();
+  }
+
+  /* ========= PHONE/PRO ========= */
+  function togglePro(){ cfg.pro=!cfg.pro; saveSettings(); refreshUI(); }
+
+  /* ========= EVENT BINDINGS ========= */
+  // Sound controls
+  soundPackEl.addEventListener("change", ()=>{ cfg.soundPack=soundPackEl.value; if(!cfg.ambience) stopAmbience(); saveSettings(); refreshUI(); });
+  warnPatternEl.addEventListener("change", saveSettings);
+  endPatternEl.addEventListener("change", saveSettings);
+
+  volEl.addEventListener("input", ()=>{ applyVolumes(); refreshUI(); saveSettings(); });
+  clapVolEl.addEventListener("input", ()=>{ refreshUI(); saveSettings(); });
+  bellVolEl.addEventListener("input", ()=>{ refreshUI(); saveSettings(); });
+
+  // callouts
+  bagTypeEl.addEventListener("change", ()=>{ cfg.bagType=bagTypeEl.value; saveSettings(); });
+  calloutEveryEl.addEventListener("input", ()=>{ cfg.calloutEvery=clampInt(calloutEveryEl.value,3,60,10); saveSettings(); });
+  tempoEveryEl.addEventListener("input", ()=>{ cfg.tempoEvery=clampInt(tempoEveryEl.value,1,30,5); saveSettings(); });
+  punchTargetEl.addEventListener("input", ()=>{ cfg.punchTargetPerMin=clampInt(punchTargetEl.value,0,200,0); saveSettings(); });
+
+  // adaptive rule
+  adaptRuleEl.addEventListener("change", ()=>{ cfg.adaptRule=adaptRuleEl.value; saveSettings(); });
+
+  // rebuild on input changes when not running
+  const rebuildOnChange = (el)=> el.addEventListener("input", ()=>{ if(!running) rebuildFromMode(); saveSettings(); });
+  [roundsEl, roundTimeEl, restTimeEl, warmupEl, cooldownEl, emomMinutesEl, emomWorkEl, emomRestEl, tabCyclesEl, tabWorkEl, tabRestEl, hiitRepeatsEl, hiitWorkEl, hiitRestEl]
+    .forEach(rebuildOnChange);
+
+  /* ========= INIT ========= */
+  initLibrary();
+  loadSettings();
+  showModeCards();
+
+  // push cfg into UI buttons
+  calloutOnBtn.textContent = cfg.calloutsOn ? "On" : "Off";
+  tempoOnBtn.textContent = cfg.tempoOn ? "On" : "Off";
+  ttsCalloutBtn.textContent = cfg.calloutVoice ? "On" : "Off";
+  ttsStepBtn.textContent = cfg.announceSteps ? "On" : "Off";
+  ambBtn.textContent = cfg.ambience ? "On" : "Off";
+
+  cornerEnabled = false; // default off unless user toggled and saved later (we store via cfg? keep simple)
+  cornerDockEnabled = false;
+
+  // apply url overrides
+  applyFromUrl();
+
+  // build sequence initial
+  sequence = buildSequenceFromMode();
+  stepIndex=0;
+  timeLeft = sequence[0] ? sequence[0].seconds : 0;
+  stepDuration = Math.max(1,timeLeft||1);
+
+  // set UI from cfg
+  modeSel.value = cfg.mode;
+  soundPackEl.value = cfg.soundPack;
+  adaptRuleEl.value = cfg.adaptRule;
+
+  bagTypeEl.value = cfg.bagType || "heavy";
+  calloutEveryEl.value = cfg.calloutEvery || 10;
+  tempoEveryEl.value = cfg.tempoEvery || 5;
+  punchTargetEl.value = cfg.punchTargetPerMin || 0;
+
+  updatePBUI();
+  refreshUI();
+  saveSettings();
+  </script>
+</body>
+</html>
