@@ -7,8 +7,6 @@
   <style>
     :root{
       --bg:#0b0d12;
-      --panel:rgba(255,255,255,0.06);
-      --panel2:rgba(255,255,255,0.10);
       --stroke:rgba(255,255,255,0.10);
       --text:#eaf0ff;
       --muted:rgba(234,240,255,0.65);
@@ -33,32 +31,21 @@
       overflow-x:hidden;
     }
 
-    .wrap{
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 18px 16px 42px;
-    }
-
+    .wrap{max-width:1000px;margin:0 auto;padding:18px 16px 42px;}
     .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 10px 12px;
-      border:1px solid var(--stroke);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      padding:10px 12px;border:1px solid var(--stroke);
       background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
-    .brand{
-      display:flex; flex-direction:column; gap:2px;
-    }
-    .brand .title{font-weight:900; letter-spacing:0.4px}
-    .brand .sub{font-size:12px; color:var(--muted)}
-    .actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
-    button, select, input{
-      font: inherit;
-    }
+    .brand{display:flex;flex-direction:column;gap:2px;}
+    .brand .title{font-weight:1000;letter-spacing:0.4px}
+    .brand .sub{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+
+    button, select, input, textarea { font: inherit; }
+
     .btn{
       border:1px solid var(--stroke);
       background: rgba(255,255,255,0.06);
@@ -84,32 +71,19 @@
       background: linear-gradient(180deg, rgba(255,107,107,0.35), rgba(255,107,107,0.12));
       border-color: rgba(255,107,107,0.25);
     }
-    .btn.ghost{
-      background: transparent;
-    }
+    .btn.ghost{background: transparent;}
     .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 8px 10px;
-      border-radius: 999px;
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 8px 10px;border-radius: 999px;
       border:1px solid var(--stroke);
       background: rgba(255,255,255,0.05);
       color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
+      font-size: 12px;white-space: nowrap;
     }
-    .pill b{color:var(--text); font-weight:800}
+    .pill b{color:var(--text); font-weight:900}
 
-    .grid{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap:14px;
-    }
-    @media (max-width: 860px){
-      .grid{grid-template-columns:1fr}
-    }
+    .grid{margin-top:14px;display:grid;grid-template-columns:1.25fr 0.75fr;gap:14px;}
+    @media (max-width: 860px){ .grid{grid-template-columns:1fr} }
 
     .card{
       border:1px solid var(--stroke);
@@ -120,14 +94,9 @@
       position: relative;
     }
 
-    .timerCard{
-      padding: 18px;
-      overflow:hidden;
-    }
+    .timerCard{padding: 18px; overflow:hidden;}
     .timerBG{
-      position:absolute;
-      inset:-2px;
-      pointer-events:none;
+      position:absolute; inset:-2px; pointer-events:none;
       background:
         radial-gradient(700px 260px at 25% 10%, rgba(122,167,255,0.18), transparent 60%),
         radial-gradient(700px 260px at 75% 10%, rgba(75,227,138,0.12), transparent 60%),
@@ -136,36 +105,17 @@
       opacity: .9;
     }
 
-    .stageRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      position: relative;
-      z-index: 1;
-    }
-    .stage{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .stage .label{
-      font-size:12px; color:var(--muted)
-    }
-    .stage .value{
-      font-size:18px; font-weight:900; letter-spacing:0.3px
-    }
-    .meta{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    .stageRow{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1;}
+    .stage{display:flex;flex-direction:column;gap:2px;}
+    .stage .label{font-size:12px;color:var(--muted)}
+    .stage .value{font-size:18px;font-weight:1000;letter-spacing:0.3px}
+
+    .meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 
     .time{
       margin-top: 14px;
       text-align:center;
-      font-weight: 1000;
+      font-weight: 1100;
       letter-spacing: 1px;
       font-size: clamp(56px, 9vw, 110px);
       position: relative;
@@ -173,9 +123,9 @@
       user-select:none;
     }
     .time small{
-      font-size: 16px;
+      font-size: 14px;
       color: var(--muted);
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
       display:block;
       margin-top: 6px;
       font-weight: 700;
@@ -183,30 +133,18 @@
 
     .controls{
       margin-top: 14px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
+      display:flex; gap:10px; flex-wrap:wrap;
       justify-content:center;
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
     }
 
-    .rightCol{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
+    .rightCol{display:flex;flex-direction:column;gap:14px;}
 
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
     .row.space{justify-content:space-between}
     .row .grow{flex:1}
 
-    .select, .input{
+    .select, .input, .textarea{
       width:100%;
       border-radius: 14px;
       border:1px solid var(--stroke);
@@ -215,48 +153,34 @@
       padding: 10px 12px;
       outline:none;
     }
-    .select:focus, .input:focus{
+    .textarea{min-height:120px;resize:vertical;line-height:1.35;}
+    .select:focus, .input:focus, .textarea:focus{
       border-color: rgba(122,167,255,0.45);
       box-shadow: 0 0 0 3px rgba(122,167,255,0.12);
     }
 
-    .divider{
-      height:1px;
-      background: rgba(255,255,255,0.08);
-      margin: 12px 0;
+    .divider{height:1px;background: rgba(255,255,255,0.08);margin: 12px 0;}
+
+    .kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media (max-width: 420px){ .kv{grid-template-columns:1fr} }
+
+    .field label{
+      display:block;font-size:12px;color:var(--muted);
+      margin-bottom:6px;font-weight:800;
     }
 
-    .kv{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
-    @media (max-width: 420px){
-      .kv{grid-template-columns:1fr}
-    }
-    .field label{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:6px;
-      font-weight:700;
-    }
     .toggle{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding: 10px 12px;
-      border-radius: 14px;
+      display:flex;align-items:flex-start;gap:10px;
+      padding: 10px 12px;border-radius: 14px;
       border:1px solid var(--stroke);
       background: rgba(255,255,255,0.05);
     }
-    .toggle input{transform: scale(1.15)}
+    .toggle input{transform: scale(1.15); margin-top: 2px;}
     .toggle span{font-size: 13px; color:var(--muted)}
     .toggle b{color:var(--text)}
 
     .drawer{
-      position:fixed;
-      inset:0;
+      position:fixed; inset:0;
       background: rgba(0,0,0,0.55);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -268,7 +192,7 @@
     }
     .drawer.open{display:flex;}
     .sheet{
-      width: min(920px, 100%);
+      width: min(980px, 100%);
       max-height: 88vh;
       overflow:auto;
       border-radius: 22px;
@@ -278,12 +202,8 @@
       padding: 14px;
     }
     .sheetHeader{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      position:sticky;
-      top:0;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      position:sticky;top:0;
       background: linear-gradient(180deg, rgba(20,24,34,0.92), rgba(20,24,34,0.72));
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -292,13 +212,25 @@
       border-radius: 18px;
       z-index: 2;
     }
-    .sheetHeader h2{margin:0; font-size: 16px; letter-spacing:0.2px}
-    .sheetHeader p{margin:0; color:var(--muted); font-size:12px}
+    .sheetHeader h2{margin:0;font-size:16px;letter-spacing:0.2px}
+    .sheetHeader p{margin:0;color:var(--muted);font-size:12px}
 
-    .tiny{
-      font-size:12px;
-      color: var(--muted);
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+    .tab{
+      padding:8px 10px;border-radius:999px;border:1px solid var(--stroke);
+      background: rgba(255,255,255,0.05); color: var(--muted);
+      cursor:pointer; user-select:none;
+      font-size:12px; font-weight:900;
     }
+    .tab.active{
+      color: var(--text);
+      border-color: rgba(122,167,255,0.35);
+      background: rgba(122,167,255,0.14);
+    }
+    .tabPanel{display:none;padding:10px;}
+    .tabPanel.active{display:block;}
+
+    .tiny{font-size:12px;color:var(--muted);}
 
     /* Ultra mode hides everything except timer */
     body.ultra .topbar,
@@ -307,30 +239,17 @@
     body.ultra .wrap > .grid > .card:not(.timerCard){
       display:none !important;
     }
-    body.ultra .wrap{
-      max-width: 1100px;
-      padding-top: 18px;
-    }
-    body.ultra .timerCard{
-      padding: 26px 18px;
-    }
-    body.ultra .time{
-      font-size: clamp(70px, 14vw, 150px);
-    }
+    body.ultra .wrap{max-width: 1100px;padding-top:18px;}
+    body.ultra .timerCard{padding: 26px 18px;}
+    body.ultra .time{font-size: clamp(70px, 14vw, 150px);}
 
     /* Always-visible escape button */
     #exitUltraBtn{
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 999999;
-      padding: 10px 12px;
-      border-radius: 14px;
+      position: fixed; top: 12px; right: 12px; z-index: 999999;
+      padding: 10px 12px; border-radius: 14px;
       border: 1px solid rgba(255,255,255,0.25);
       background: rgba(0,0,0,0.55);
-      color: #fff;
-      font-weight: 900;
-      font-size: 13px;
+      color: #fff; font-weight: 1000; font-size: 13px;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       cursor: pointer;
@@ -345,11 +264,12 @@
     <div class="topbar">
       <div class="brand">
         <div class="title">Boxing Timer</div>
-        <div class="sub">Rounds, rest, presets, loud warning claps, real bell, and no getting stuck.</div>
+        <div class="sub">Normal timer or Bag Callouts. Clean UI, loud claps, real bell, stats.</div>
       </div>
 
       <div class="actions">
         <span class="pill" id="statusPill"><b>Idle</b> <span>ready</span></span>
+        <span class="pill" id="modePill"><b>Mode</b> <span>Normal</span></span>
         <button class="btn" id="openSettingsBtn">Settings</button>
         <button class="btn ghost" id="resetUrlBtn" title="Open reset link">Reset Link</button>
       </div>
@@ -371,7 +291,7 @@
         </div>
 
         <div class="time" id="timeDisplay">00:00
-          <small id="timeHint">Tap Start. (Tip: long-press the timer to exit Ultra)</small>
+          <small id="timeHint">Tap Start. (Tip: long-press timer to exit Ultra)</small>
         </div>
 
         <div class="controls">
@@ -386,7 +306,30 @@
         <div class="card">
           <div class="row space">
             <div>
-              <div style="font-weight:900;">Presets</div>
+              <div style="font-weight:1000;">Quick</div>
+              <div class="tiny">Keep it simple. Go deep in Settings if you want.</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+
+          <div class="field">
+            <label>Mode</label>
+            <select class="select" id="modeSelect">
+              <option value="normal">Normal Timer</option>
+              <option value="bag">Bag Callouts</option>
+            </select>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn primary grow" id="testCalloutBtn" title="Test a callout (Bag mode)">Test callout</button>
+            <button class="btn grow" id="shareBtn" title="Copy link with current settings">Share</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row space">
+            <div>
+              <div style="font-weight:1000;">Presets</div>
               <div class="tiny">Quick load common formats.</div>
             </div>
           </div>
@@ -415,7 +358,7 @@
         </div>
 
         <div class="card">
-          <div style="font-weight:900;">Session</div>
+          <div style="font-weight:1000;">Session</div>
           <div class="tiny">Local-only stats.</div>
           <div class="divider"></div>
           <div class="row space">
@@ -435,37 +378,66 @@
       <div class="sheetHeader">
         <div>
           <h2>Settings</h2>
-          <p>Saved automatically. Use “Reset Link” if anything ever looks stuck.</p>
+          <p>Saved automatically. Use Reset Link if anything ever looks stuck.</p>
         </div>
         <button class="btn" id="closeSettingsBtn">Close</button>
       </div>
 
-      <div style="padding: 10px;">
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-tab="timer">Timer</div>
+        <div class="tab" data-tab="sound">Sound</div>
+        <div class="tab" data-tab="training">Training</div>
+        <div class="tab" data-tab="display">Display</div>
+        <div class="tab" data-tab="data">Data</div>
+      </div>
+
+      <div class="tabPanel active" id="panel-timer">
         <div class="kv">
           <div class="field">
             <label>Rounds</label>
             <input class="input" id="roundsInput" type="number" min="1" max="99" />
           </div>
-
           <div class="field">
             <label>Round length (seconds)</label>
             <input class="input" id="roundLenInput" type="number" min="10" max="3600" />
           </div>
-
           <div class="field">
             <label>Rest length (seconds)</label>
             <input class="input" id="restLenInput" type="number" min="0" max="3600" />
           </div>
-
           <div class="field">
-            <label>Volume (0.0 to 1.0)</label>
+            <label>Mode</label>
+            <select class="select" id="modeSelect2">
+              <option value="normal">Normal Timer</option>
+              <option value="bag">Bag Callouts</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabPanel" id="panel-sound">
+        <div class="kv">
+          <div class="field">
+            <label>Master volume (0.0 to 1.0)</label>
             <input class="input" id="volumeInput" type="number" step="0.05" min="0" max="1" />
+          </div>
+          <div class="field">
+            <label>Voice callout volume (0.0 to 1.0)</label>
+            <input class="input" id="voiceVolInput" type="number" step="0.05" min="0" max="1" />
           </div>
         </div>
 
         <div class="divider"></div>
 
         <div class="kv">
+          <div class="toggle">
+            <input id="soundToggle" type="checkbox" />
+            <div>
+              <b>Sounds enabled</b><br/>
+              <span>Claps + bell + optional beep before callouts.</span>
+            </div>
+          </div>
+
           <div class="toggle">
             <input id="tenSecToggle" type="checkbox" />
             <div>
@@ -483,18 +455,76 @@
           </div>
 
           <div class="toggle">
-            <input id="soundToggle" type="checkbox" />
+            <input id="beepBeforeCalloutToggle" type="checkbox" />
             <div>
-              <b>Sounds enabled</b><br/>
-              <span>Turn off if you’re being sneaky in the office 😇</span>
+              <b>Beep before callout</b><br/>
+              <span>Quick “heads up” before the combo is spoken.</span>
             </div>
           </div>
+        </div>
+      </div>
 
+      <div class="tabPanel" id="panel-training">
+        <div class="kv">
+          <div class="field">
+            <label>Callouts</label>
+            <select class="select" id="calloutModeSelect">
+              <option value="off">Off</option>
+              <option value="rounds">During rounds only</option>
+              <option value="all">Rounds + rest</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Callout frequency (seconds)</label>
+            <input class="input" id="calloutEveryInput" type="number" min="3" max="60" />
+          </div>
+
+          <div class="field">
+            <label>Order</label>
+            <select class="select" id="calloutOrderSelect">
+              <option value="random">Random</option>
+              <option value="sequential">Sequential</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Voice</label>
+            <select class="select" id="voiceSelect"></select>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label>Combo list (one per line)</label>
+          <textarea class="textarea" id="comboListInput" placeholder="Jab, cross&#10;Jab, cross, hook&#10;Double jab, cross&#10;Slip, cross, hook"></textarea>
+          <div class="tiny" style="margin-top:8px;">
+            Tip: Keep them short. Spoken combos work best when the phone isn’t trying to rap.
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <button class="btn primary" id="addDefaultCombosBtn">Load default combos</button>
+          <button class="btn" id="clearCombosBtn">Clear</button>
+        </div>
+      </div>
+
+      <div class="tabPanel" id="panel-display">
+        <div class="kv">
           <div class="toggle">
             <input id="ultraToggle" type="checkbox" />
             <div>
               <b>Ultra mode</b><br/>
-              <span>Big clock only. Always has exit button + long-press escape.</span>
+              <span>Big clock only. Always has Exit + long-press escape.</span>
+            </div>
+          </div>
+
+          <div class="toggle">
+            <input id="keepAwakeToggle" type="checkbox" />
+            <div>
+              <b>Keep screen awake</b><br/>
+              <span>Uses Wake Lock when available.</span>
             </div>
           </div>
         </div>
@@ -507,28 +537,68 @@
           </div>
           <button class="btn" id="copyResetLinkBtn">Copy reset link</button>
         </div>
+      </div>
 
+      <div class="tabPanel" id="panel-data">
+        <div class="row" style="margin-top:6px;">
+          <button class="btn bad" id="hardResetBtn">Reset all settings</button>
+          <button class="btn" id="exportBtn">Export settings</button>
+          <button class="btn" id="importBtn">Import settings</button>
+        </div>
+        <div class="tiny" style="margin-top:10px;">
+          Export gives you a text blob you can save. Import restores it. Useful if you break stuff experimenting.
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    /***************
-     * Storage
-     ***************/
-    const STORAGE_KEY = "bt_settings_v1";
+    /********************
+     * Storage + Defaults
+     ********************/
+    const STORAGE_KEY = "bt_settings_v2";
     const FAV_KEY = "bt_favorites_v1";
     const STATS_KEY = "bt_stats_v1";
+
+    const DEFAULT_COMBOS = [
+      "Jab, cross",
+      "Jab, cross, hook",
+      "Double jab, cross",
+      "Jab, slip, cross",
+      "Cross, hook, cross",
+      "Jab to the body, cross",
+      "Jab, jab, cross, hook",
+      "Slip right, cross, hook",
+      "Roll, hook, cross",
+      "Jab, step out, cross"
+    ];
 
     const defaultSettings = {
       rounds: 3,
       roundLen: 180,
       restLen: 60,
+
+      // sound
       volume: 0.9,
+      voiceVol: 1.0,
       warn10: true,
       bellTriple: true,
       sounds: true,
-      ultra: false
+      beepBeforeCallout: false,
+
+      // mode
+      mode: "normal", // normal | bag
+
+      // bag callouts
+      calloutMode: "rounds", // off | rounds | all
+      calloutEvery: 12,
+      calloutOrder: "random", // random | sequential
+      voiceURI: "default",
+      comboListText: DEFAULT_COMBOS.join("\n"),
+
+      // display
+      ultra: false,
+      keepAwake: false
     };
 
     function loadSettings() {
@@ -541,7 +611,6 @@
         return { ...defaultSettings };
       }
     }
-
     function saveSettings(s) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
     }
@@ -554,7 +623,6 @@
         return [];
       }
     }
-
     function saveFavs(list) {
       localStorage.setItem(FAV_KEY, JSON.stringify(list));
     }
@@ -571,31 +639,25 @@
       localStorage.setItem(STATS_KEY, JSON.stringify(st));
     }
 
-    /***************
+    /********************
      * Anti-stuck Ultra Guard
-     ***************/
+     ********************/
     (function ultraGuard(){
       function disableUltraInStorage(){
         try{
-          // flip in our known settings key
           const s = loadSettings();
-          if (s.ultra) {
-            s.ultra = false;
-            saveSettings(s);
-          }
-          // generic scan (if keys ever change later)
+          if (s.ultra) { s.ultra = false; saveSettings(s); }
           for (let i=0;i<localStorage.length;i++){
             const k = localStorage.key(i);
             if (!k) continue;
             const raw = localStorage.getItem(k);
             if (!raw) continue;
 
-            // simple flag
             if (k.toLowerCase().includes("ultra") && (raw==="true"||raw==="1")) {
               localStorage.setItem(k,"false");
               continue;
             }
-            // json object
+
             let obj;
             try { obj = JSON.parse(raw); } catch { continue; }
             if (!obj || typeof obj !== "object") continue;
@@ -608,9 +670,7 @@
             }
             if (changed) localStorage.setItem(k, JSON.stringify(obj));
           }
-        }catch(e){
-          console.warn("Ultra guard:", e);
-        }
+        }catch(e){ console.warn("Ultra guard:", e); }
       }
 
       function hardExitUltra(){
@@ -624,7 +684,6 @@
         window.location.reload();
       }
 
-      // URL escape hatch
       try{
         const sp = new URLSearchParams(window.location.search);
         if (sp.get("reset") === "1") hardExitUltra();
@@ -633,18 +692,15 @@
       window.__hardExitUltra = hardExitUltra;
     })();
 
-    /***************
+    /********************
      * Audio (WebAudio)
-     ***************/
+     ********************/
     let audioCtx = null;
-
     function ensureAudio() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === "suspended") audioCtx.resume();
     }
-
     function now() { return audioCtx ? audioCtx.currentTime : 0; }
-
     function masterGainNode(vol) {
       const g = audioCtx.createGain();
       g.gain.value = vol;
@@ -652,19 +708,31 @@
       return g;
     }
 
+    function playBeep(volume=0.5, when=0){
+      if (!audioCtx) return;
+      const t0 = now()+when;
+      const out = masterGainNode(volume);
+      const osc = audioCtx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, t0);
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(1.0, t0+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+0.10);
+      osc.connect(g); g.connect(out);
+      osc.start(t0); osc.stop(t0+0.12);
+    }
+
     // Loud clap: short noise burst + transient
     function playClap(volume=0.9, when=0) {
       if (!audioCtx) return;
       const t0 = now() + when;
-
       const out = masterGainNode(volume);
 
-      // noise
       const bufferSize = Math.floor(audioCtx.sampleRate * 0.12);
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i=0;i<bufferSize;i++){
-        // "clap" noise shape: heavy at start, fades quickly
         const x = i / bufferSize;
         const amp = Math.pow(1 - x, 4);
         data[i] = (Math.random()*2-1) * amp;
@@ -672,7 +740,6 @@
       const noise = audioCtx.createBufferSource();
       noise.buffer = buffer;
 
-      // filter for crisp snap
       const hp = audioCtx.createBiquadFilter();
       hp.type = "highpass";
       hp.frequency.setValueAtTime(900, t0);
@@ -681,7 +748,6 @@
       lp.type = "lowpass";
       lp.frequency.setValueAtTime(6500, t0);
 
-      // transient thump (tiny) to make it feel like hands, not plastic
       const osc = audioCtx.createOscillator();
       osc.type = "triangle";
       osc.frequency.setValueAtTime(180, t0);
@@ -692,54 +758,37 @@
       oscG.gain.exponentialRampToValueAtTime(0.18, t0 + 0.005);
       oscG.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.08);
 
-      // envelope
       const env = audioCtx.createGain();
       env.gain.setValueAtTime(0.0001, t0);
       env.gain.exponentialRampToValueAtTime(1.0, t0 + 0.004);
       env.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
 
-      noise.connect(hp);
-      hp.connect(lp);
-      lp.connect(env);
-      env.connect(out);
+      noise.connect(hp); hp.connect(lp); lp.connect(env); env.connect(out);
+      osc.connect(oscG); oscG.connect(out);
 
-      osc.connect(oscG);
-      oscG.connect(out);
-
-      noise.start(t0);
-      noise.stop(t0 + 0.13);
-      osc.start(t0);
-      osc.stop(t0 + 0.09);
+      noise.start(t0); noise.stop(t0 + 0.13);
+      osc.start(t0); osc.stop(t0 + 0.09);
     }
 
     // Boxing bell-ish: bright partials with decay
     function playBell(volume=0.9, when=0, brightness=1.0, length=1.8) {
       if (!audioCtx) return;
       const t0 = now() + when;
-
       const out = masterGainNode(volume);
 
-      const freqs = [
-        880 * brightness,
-        1320 * brightness,
-        1760 * brightness,
-        2200 * brightness
-      ];
-
-      const gains = [0.9, 0.6, 0.35, 0.22];
+      const freqs = [880,1320,1760,2200].map(f=>f*brightness);
+      const gains = [0.9,0.6,0.35,0.22];
 
       const mix = audioCtx.createGain();
       mix.gain.setValueAtTime(1, t0);
       mix.connect(out);
 
-      // envelope on final output
       const env = audioCtx.createGain();
       env.gain.setValueAtTime(0.0001, t0);
       env.gain.exponentialRampToValueAtTime(1.0, t0 + 0.02);
       env.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
       env.connect(mix);
 
-      // slight metallic shimmer via filtered noise
       const bufferSize = Math.floor(audioCtx.sampleRate * 0.25);
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -761,14 +810,9 @@
       nG.gain.exponentialRampToValueAtTime(0.25, t0 + 0.03);
       nG.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
 
-      noise.connect(bp);
-      bp.connect(nG);
-      nG.connect(env);
+      noise.connect(bp); bp.connect(nG); nG.connect(env);
+      noise.start(t0); noise.stop(t0 + length);
 
-      noise.start(t0);
-      noise.stop(t0 + length);
-
-      // main tones
       freqs.forEach((f, idx) => {
         const o = audioCtx.createOscillator();
         o.type = "sine";
@@ -779,11 +823,8 @@
         g.gain.exponentialRampToValueAtTime(gains[idx], t0 + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
 
-        o.connect(g);
-        g.connect(env);
-
-        o.start(t0);
-        o.stop(t0 + length);
+        o.connect(g); g.connect(env);
+        o.start(t0); o.stop(t0 + length);
       });
     }
 
@@ -792,17 +833,36 @@
       playClap(vol, 0.45);
       playClap(vol, 0.90);
     }
-
     function tripleBell(vol){
-      // crescendo-ish (each ding louder + longer)
       playBell(vol * 0.75, 0.00, 1.15, 1.6);
       playBell(vol * 0.95, 0.65, 1.20, 1.75);
       playBell(vol * 1.10, 1.30, 1.25, 1.9);
     }
 
-    /***************
-     * Presets + Favorites
-     ***************/
+    /********************
+     * Speech (Bag callouts)
+     ********************/
+    function speak(text, voiceURI, volume){
+      if (!("speechSynthesis" in window)) return;
+      try{
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 1.0;
+        u.pitch = 1.05;
+        u.volume = Math.max(0, Math.min(1, volume ?? 1.0));
+
+        const voices = speechSynthesis.getVoices();
+        if (voiceURI && voiceURI !== "default"){
+          const v = voices.find(v=>v.voiceURI === voiceURI);
+          if (v) u.voice = v;
+        }
+        speechSynthesis.speak(u);
+      }catch{}
+    }
+
+    /********************
+     * Presets
+     ********************/
     const presets = [
       { id:"pro-3x3", name:"Pro Boxing: 3 x 3:00 (1:00 rest)", rounds:3, roundLen:180, restLen:60 },
       { id:"pro-6x3", name:"Work: 6 x 3:00 (1:00 rest)", rounds:6, roundLen:180, restLen:60 },
@@ -825,24 +885,51 @@
       return `${m}:${String(s).padStart(2,"0")}`;
     }
 
-    /***************
-     * Timer engine
-     ***************/
+    /********************
+     * App State
+     ********************/
     let settings = loadSettings();
     let stats = loadStats();
 
     const state = {
       running: false,
       phase: "ready", // ready | round | rest | done
-      roundIndex: 0,  // 1-based during rounds
+      roundIndex: 0,
       remaining: 0,
       tickHandle: null,
       lastTs: 0,
       totalThisSession: 0,
-      warned10: false
+      warned10: false,
+
+      // bag callouts
+      calloutTimer: 0,
+      calloutIndex: 0
     };
 
-    // UI elements
+    /********************
+     * Wake Lock
+     ********************/
+    let wakeLock = null;
+    async function setWakeLock(on){
+      if (!("wakeLock" in navigator)) return;
+      try{
+        if (on && !wakeLock){
+          wakeLock = await navigator.wakeLock.request("screen");
+        } else if (!on && wakeLock){
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      }catch{}
+    }
+    document.addEventListener("visibilitychange", ()=>{
+      if (document.visibilityState === "visible" && settings.keepAwake){
+        setWakeLock(true);
+      }
+    });
+
+    /********************
+     * DOM
+     ********************/
     const stageText = document.getElementById("stageText");
     const nextText = document.getElementById("nextText");
     const roundNum = document.getElementById("roundNum");
@@ -850,6 +937,7 @@
     const timeDisplay = document.getElementById("timeDisplay");
     const timeHint = document.getElementById("timeHint");
     const statusPill = document.getElementById("statusPill");
+    const modePill = document.getElementById("modePill");
 
     const startBtn = document.getElementById("startBtn");
     const pauseBtn = document.getElementById("pauseBtn");
@@ -860,21 +948,37 @@
     const openSettingsBtn = document.getElementById("openSettingsBtn");
     const closeSettingsBtn = document.getElementById("closeSettingsBtn");
     const drawer = document.getElementById("drawer");
-
     const resetUrlBtn = document.getElementById("resetUrlBtn");
+    const copyResetLinkBtn = document.getElementById("copyResetLinkBtn");
 
-    // Settings inputs
+    const shareBtn = document.getElementById("shareBtn");
+    const testCalloutBtn = document.getElementById("testCalloutBtn");
+
     const roundsInput = document.getElementById("roundsInput");
     const roundLenInput = document.getElementById("roundLenInput");
     const restLenInput = document.getElementById("restLenInput");
+
     const volumeInput = document.getElementById("volumeInput");
+    const voiceVolInput = document.getElementById("voiceVolInput");
     const tenSecToggle = document.getElementById("tenSecToggle");
     const bellTripleToggle = document.getElementById("bellTripleToggle");
     const soundToggle = document.getElementById("soundToggle");
-    const ultraToggle = document.getElementById("ultraToggle");
-    const copyResetLinkBtn = document.getElementById("copyResetLinkBtn");
+    const beepBeforeCalloutToggle = document.getElementById("beepBeforeCalloutToggle");
 
-    // Presets/favs
+    const modeSelect = document.getElementById("modeSelect");
+    const modeSelect2 = document.getElementById("modeSelect2");
+
+    const calloutModeSelect = document.getElementById("calloutModeSelect");
+    const calloutEveryInput = document.getElementById("calloutEveryInput");
+    const calloutOrderSelect = document.getElementById("calloutOrderSelect");
+    const voiceSelect = document.getElementById("voiceSelect");
+    const comboListInput = document.getElementById("comboListInput");
+    const addDefaultCombosBtn = document.getElementById("addDefaultCombosBtn");
+    const clearCombosBtn = document.getElementById("clearCombosBtn");
+
+    const ultraToggle = document.getElementById("ultraToggle");
+    const keepAwakeToggle = document.getElementById("keepAwakeToggle");
+
     const presetSelect = document.getElementById("presetSelect");
     const applyPresetBtn = document.getElementById("applyPresetBtn");
     const saveFavBtn = document.getElementById("saveFavBtn");
@@ -882,27 +986,99 @@
     const applyFavBtn = document.getElementById("applyFavBtn");
     const deleteFavBtn = document.getElementById("deleteFavBtn");
 
-    // Stats
     const statCompleted = document.getElementById("statCompleted");
     const statTime = document.getElementById("statTime");
     const clearStatsBtn = document.getElementById("clearStatsBtn");
 
+    const hardResetBtn = document.getElementById("hardResetBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const importBtn = document.getElementById("importBtn");
+
+    /********************
+     * Tabs
+     ********************/
+    const tabs = document.getElementById("tabs");
+    tabs.addEventListener("click", (e)=>{
+      const t = e.target.closest(".tab");
+      if (!t) return;
+      const name = t.dataset.tab;
+      document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active", x.dataset.tab===name));
+      document.querySelectorAll(".tabPanel").forEach(p=>p.classList.toggle("active", p.id===`panel-${name}`));
+    });
+
+    /********************
+     * Helpers
+     ********************/
+    function setPill(main, sub){
+      statusPill.innerHTML = `<b>${main}</b> <span>${sub}</span>`;
+    }
+    function setModePill(){
+      const label = settings.mode === "bag" ? "Bag" : "Normal";
+      modePill.innerHTML = `<b>Mode</b> <span>${label}</span>`;
+    }
+
+    function clampInt(v, min, max, fallback){
+      const n = parseInt(v,10);
+      if (!Number.isFinite(n)) return fallback;
+      return Math.max(min, Math.min(max, n));
+    }
+    function clampFloat(v, min, max, fallback){
+      const n = parseFloat(v);
+      if (!Number.isFinite(n)) return fallback;
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function getCombos(){
+      const lines = (settings.comboListText || "")
+        .split("\n")
+        .map(s=>s.trim())
+        .filter(Boolean);
+      return lines.length ? lines : DEFAULT_COMBOS.slice();
+    }
+
+    /********************
+     * Ultra
+     ********************/
     function applyUltraUI(on){
       document.body.classList.toggle("ultra", !!on);
-      // show the always-available exit button ONLY when ultra is on
       exitUltraBtn.style.display = on ? "block" : "none";
-      ultraToggle.checked = !!on;
       settings.ultra = !!on;
+      ultraToggle.checked = !!on;
       saveSettings(settings);
     }
 
+    /********************
+     * Voices
+     ********************/
+    function populateVoices(){
+      if (!("speechSynthesis" in window)) {
+        voiceSelect.innerHTML = `<option value="default">Speech not supported</option>`;
+        return;
+      }
+      const voices = speechSynthesis.getVoices() || [];
+      const options = [`<option value="default">Default voice</option>`]
+        .concat(voices.map(v=>{
+          const name = `${v.name}${v.lang ? " ("+v.lang+")" : ""}`;
+          return `<option value="${v.voiceURI}">${escapeHtml(name)}</option>`;
+        }));
+      voiceSelect.innerHTML = options.join("");
+      voiceSelect.value = settings.voiceURI || "default";
+    }
+    function escapeHtml(s){
+      return s.replace(/[&<>"']/g, c => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[c]));
+    }
+    if ("speechSynthesis" in window) {
+      speechSynthesis.onvoiceschanged = populateVoices;
+    }
+
+    /********************
+     * Render
+     ********************/
     function updateStatsUI(){
       statCompleted.textContent = stats.completed || 0;
       statTime.textContent = fmtMSS(stats.totalSeconds || 0);
-    }
-
-    function setPill(main, sub){
-      statusPill.innerHTML = `<b>${main}</b> <span>${sub}</span>`;
     }
 
     function render(){
@@ -913,7 +1089,9 @@
         stageText.textContent = "Ready";
         nextText.textContent = "Round 1";
         timeDisplay.firstChild.nodeValue = fmtMMSS(settings.roundLen);
-        timeHint.textContent = "Tap Start. (Tip: long-press timer to exit Ultra)";
+        timeHint.textContent = settings.mode === "bag"
+          ? "Bag mode: callouts happen during rounds."
+          : "Tap Start.";
         setPill("Idle", "ready");
       } else if (state.phase === "round"){
         stageText.textContent = `Round ${state.roundIndex}`;
@@ -937,8 +1115,13 @@
 
       startBtn.disabled = state.running;
       pauseBtn.disabled = !state.running;
+
+      setModePill();
     }
 
+    /********************
+     * Timer engine
+     ********************/
     function resetToReady(){
       stopTick();
       state.running = false;
@@ -946,22 +1129,24 @@
       state.roundIndex = 0;
       state.remaining = settings.roundLen;
       state.warned10 = false;
+      state.calloutTimer = 0;
+      state.calloutIndex = 0;
       render();
     }
 
     function startSession(){
       if (state.phase === "done") resetToReady();
-
       if (state.phase === "ready"){
         state.phase = "round";
         state.roundIndex = 1;
         state.remaining = settings.roundLen;
         state.warned10 = false;
+        state.calloutTimer = 0;
       }
-
       state.running = true;
       state.lastTs = performance.now();
-      ensureAudio(); // unlock/resume audio on user gesture
+      ensureAudio();
+      if (settings.keepAwake) setWakeLock(true);
       startTick();
       render();
     }
@@ -976,8 +1161,8 @@
       state.phase = "done";
       state.running = false;
       stopTick();
+      if (wakeLock) setWakeLock(false);
 
-      // stats
       stats.completed = (stats.completed || 0) + 1;
       stats.totalSeconds = (stats.totalSeconds || 0) + Math.floor(state.totalThisSession);
       state.totalThisSession = 0;
@@ -987,37 +1172,65 @@
       render();
     }
 
+    function doCallout(){
+      if (settings.mode !== "bag") return;
+      if (settings.calloutMode === "off") return;
+
+      const inRound = state.phase === "round";
+      const inRest = state.phase === "rest";
+
+      if (settings.calloutMode === "rounds" && !inRound) return;
+      if (settings.calloutMode === "all" && !(inRound || inRest)) return;
+
+      const combos = getCombos();
+      if (!combos.length) return;
+
+      let text = "";
+      if (settings.calloutOrder === "sequential"){
+        text = combos[state.calloutIndex % combos.length];
+        state.calloutIndex++;
+      } else {
+        text = combos[Math.floor(Math.random()*combos.length)];
+      }
+
+      // Optional beep before voice
+      if (settings.sounds && settings.beepBeforeCallout) {
+        ensureAudio();
+        playBeep(Math.min(1, settings.volume*0.7), 0);
+      }
+
+      // Speak
+      speak(text, settings.voiceURI, settings.voiceVol);
+    }
+
     function transition(){
-      // phase ended
       if (state.phase === "round"){
-        // end of round bell
         if (settings.sounds && settings.bellTriple) {
           ensureAudio();
           tripleBell(settings.volume);
         }
-
         if (state.roundIndex >= settings.rounds){
           finishSession();
           return;
         }
-
-        // go to rest (if restLen is 0, skip)
         if (settings.restLen > 0){
           state.phase = "rest";
           state.remaining = settings.restLen;
           state.warned10 = false;
+          state.calloutTimer = 0;
         } else {
           state.roundIndex++;
           state.phase = "round";
           state.remaining = settings.roundLen;
           state.warned10 = false;
+          state.calloutTimer = 0;
         }
       } else if (state.phase === "rest"){
-        // start next round
         state.roundIndex++;
         state.phase = "round";
         state.remaining = settings.roundLen;
         state.warned10 = false;
+        state.calloutTimer = 0;
       }
     }
 
@@ -1027,7 +1240,16 @@
       state.remaining -= dt;
       state.totalThisSession += dt;
 
-      // 10s warning (only during rounds)
+      // bag callout timer
+      if (settings.mode === "bag" && settings.calloutMode !== "off"){
+        state.calloutTimer += dt;
+        if (state.calloutTimer >= settings.calloutEvery){
+          state.calloutTimer = 0;
+          doCallout();
+        }
+      }
+
+      // 10s warning (rounds only)
       if (settings.warn10 && settings.sounds && state.phase === "round" && !state.warned10 && state.remaining <= 10 && state.remaining > 0) {
         state.warned10 = true;
         ensureAudio();
@@ -1062,49 +1284,35 @@
       state.tickHandle = requestAnimationFrame(loop);
     }
 
-    /***************
-     * UI wiring
-     ***************/
+    /********************
+     * Drawer
+     ********************/
     function openDrawer(){ drawer.classList.add("open"); }
     function closeDrawer(){ drawer.classList.remove("open"); }
-
     openSettingsBtn.addEventListener("click", openDrawer);
     closeSettingsBtn.addEventListener("click", closeDrawer);
-    drawer.addEventListener("click", (e)=>{
-      if (e.target === drawer) closeDrawer();
-    });
+    drawer.addEventListener("click", (e)=>{ if (e.target === drawer) closeDrawer(); });
 
+    /********************
+     * Buttons
+     ********************/
     startBtn.addEventListener("click", startSession);
     pauseBtn.addEventListener("click", pauseSession);
-    resetBtn.addEventListener("click", () => {
-      resetToReady();
-    });
+    resetBtn.addEventListener("click", ()=> resetToReady());
 
-    function exitUltra(){
-      applyUltraUI(false);
-    }
-    function enterUltra(){
-      applyUltraUI(true);
-    }
-
-    ultraBtn.addEventListener("click", ()=>{
-      applyUltraUI(!settings.ultra);
-    });
+    ultraBtn.addEventListener("click", ()=> applyUltraUI(!settings.ultra));
     exitUltraBtn.addEventListener("click", ()=>{
       if (window.__hardExitUltra) window.__hardExitUltra();
-      else exitUltra();
+      else applyUltraUI(false);
     });
 
-    // Long-press anywhere on timer to exit ultra (0.8s)
+    // long-press timer to escape ultra
     (function installLongPressEscape(){
       let t = null;
       const start = () => {
         if (!settings.ultra) return;
         if (t) clearTimeout(t);
-        t = setTimeout(()=>{
-          if (window.__hardExitUltra) window.__hardExitUltra();
-          else exitUltra();
-        }, 800);
+        t = setTimeout(()=>{ if (window.__hardExitUltra) window.__hardExitUltra(); else applyUltraUI(false); }, 800);
       };
       const stop = () => { if (t) clearTimeout(t); t = null; };
       timeDisplay.addEventListener("pointerdown", start, {passive:true});
@@ -1132,7 +1340,81 @@
       }
     });
 
-    // Presets
+    testCalloutBtn.addEventListener("click", ()=>{
+      ensureAudio();
+      doCallout();
+    });
+
+    /********************
+     * Share link with settings
+     ********************/
+    function buildShareURL(){
+      const url = new URL(window.location.href);
+      // keep clean, just set params
+      const p = url.searchParams;
+
+      p.set("mode", settings.mode);
+      p.set("r", String(settings.rounds));
+      p.set("rl", String(settings.roundLen));
+      p.set("rest", String(settings.restLen));
+
+      p.set("snd", settings.sounds ? "1" : "0");
+      p.set("v", String(settings.volume));
+      p.set("vv", String(settings.voiceVol));
+      p.set("w10", settings.warn10 ? "1" : "0");
+      p.set("bell", settings.bellTriple ? "1" : "0");
+      p.set("bpc", settings.beepBeforeCallout ? "1" : "0");
+
+      p.set("cm", settings.calloutMode);
+      p.set("ce", String(settings.calloutEvery));
+      p.set("co", settings.calloutOrder);
+
+      // keepAwake + ultra not shared by default (personal preference), but you can if you want:
+      // p.set("ultra", settings.ultra ? "1" : "0");
+      // p.set("awake", settings.keepAwake ? "1" : "0");
+
+      return url.toString();
+    }
+
+    shareBtn.addEventListener("click", async ()=>{
+      const link = buildShareURL();
+      try{
+        await navigator.clipboard.writeText(link);
+        shareBtn.textContent = "Copied!";
+        setTimeout(()=>shareBtn.textContent="Share", 900);
+      }catch{
+        window.prompt("Copy this link:", link);
+      }
+    });
+
+    function applyFromURL(){
+      try{
+        const sp = new URLSearchParams(window.location.search);
+        if (![...sp.keys()].length) return;
+
+        if (sp.has("mode")) settings.mode = sp.get("mode")==="bag" ? "bag" : "normal";
+        if (sp.has("r")) settings.rounds = clampInt(sp.get("r"), 1, 99, settings.rounds);
+        if (sp.has("rl")) settings.roundLen = clampInt(sp.get("rl"), 10, 3600, settings.roundLen);
+        if (sp.has("rest")) settings.restLen = clampInt(sp.get("rest"), 0, 3600, settings.restLen);
+
+        if (sp.has("snd")) settings.sounds = sp.get("snd")==="1";
+        if (sp.has("v")) settings.volume = clampFloat(sp.get("v"), 0, 1, settings.volume);
+        if (sp.has("vv")) settings.voiceVol = clampFloat(sp.get("vv"), 0, 1, settings.voiceVol);
+        if (sp.has("w10")) settings.warn10 = sp.get("w10")==="1";
+        if (sp.has("bell")) settings.bellTriple = sp.get("bell")==="1";
+        if (sp.has("bpc")) settings.beepBeforeCallout = sp.get("bpc")==="1";
+
+        if (sp.has("cm")) settings.calloutMode = sp.get("cm");
+        if (sp.has("ce")) settings.calloutEvery = clampInt(sp.get("ce"), 3, 60, settings.calloutEvery);
+        if (sp.has("co")) settings.calloutOrder = sp.get("co")==="sequential" ? "sequential" : "random";
+
+        saveSettings(settings);
+      }catch{}
+    }
+
+    /********************
+     * Presets + Favorites
+     ********************/
     function populatePresets(){
       presetSelect.innerHTML = "";
       presets.forEach(p=>{
@@ -1152,12 +1434,8 @@
       syncSettingsUI();
       resetToReady();
     }
+    applyPresetBtn.addEventListener("click", ()=> applyPresetById(presetSelect.value));
 
-    applyPresetBtn.addEventListener("click", ()=>{
-      applyPresetById(presetSelect.value);
-    });
-
-    // Favorites
     function populateFavs(){
       const favs = loadFavs();
       favSelect.innerHTML = "";
@@ -1177,12 +1455,8 @@
     saveFavBtn.addEventListener("click", ()=>{
       const name = prompt("Favorite name?", `My ${settings.rounds}x${fmtMSS(settings.roundLen)} (${fmtMSS(settings.restLen)} rest)`);
       if (!name) return;
-
       const favs = loadFavs();
-      favs.push({
-        name,
-        settings: { ...settings }
-      });
+      favs.push({ name, settings: { ...settings } });
       saveFavs(favs);
       populateFavs();
     });
@@ -1211,63 +1485,110 @@
       populateFavs();
     });
 
-    // Settings inputs
+    /********************
+     * Settings UI sync
+     ********************/
     function syncSettingsUI(){
       roundsInput.value = settings.rounds;
       roundLenInput.value = settings.roundLen;
       restLenInput.value = settings.restLen;
+
       volumeInput.value = settings.volume;
+      voiceVolInput.value = settings.voiceVol;
 
       tenSecToggle.checked = !!settings.warn10;
       bellTripleToggle.checked = !!settings.bellTriple;
       soundToggle.checked = !!settings.sounds;
-      ultraToggle.checked = !!settings.ultra;
-    }
+      beepBeforeCalloutToggle.checked = !!settings.beepBeforeCallout;
 
-    function clampInt(v, min, max, fallback){
-      const n = parseInt(v,10);
-      if (!Number.isFinite(n)) return fallback;
-      return Math.max(min, Math.min(max, n));
-    }
-    function clampFloat(v, min, max, fallback){
-      const n = parseFloat(v);
-      if (!Number.isFinite(n)) return fallback;
-      return Math.max(min, Math.min(max, n));
+      modeSelect.value = settings.mode;
+      modeSelect2.value = settings.mode;
+
+      calloutModeSelect.value = settings.calloutMode;
+      calloutEveryInput.value = settings.calloutEvery;
+      calloutOrderSelect.value = settings.calloutOrder;
+
+      voiceSelect.value = settings.voiceURI || "default";
+      comboListInput.value = settings.comboListText || DEFAULT_COMBOS.join("\n");
+
+      ultraToggle.checked = !!settings.ultra;
+      keepAwakeToggle.checked = !!settings.keepAwake;
+
+      setModePill();
     }
 
     function onSettingsChange(){
       settings.rounds = clampInt(roundsInput.value, 1, 99, defaultSettings.rounds);
       settings.roundLen = clampInt(roundLenInput.value, 10, 3600, defaultSettings.roundLen);
       settings.restLen = clampInt(restLenInput.value, 0, 3600, defaultSettings.restLen);
+
       settings.volume = clampFloat(volumeInput.value, 0, 1, defaultSettings.volume);
+      settings.voiceVol = clampFloat(voiceVolInput.value, 0, 1, defaultSettings.voiceVol);
 
       settings.warn10 = !!tenSecToggle.checked;
       settings.bellTriple = !!bellTripleToggle.checked;
       settings.sounds = !!soundToggle.checked;
+      settings.beepBeforeCallout = !!beepBeforeCalloutToggle.checked;
 
-      // Ultra toggle should apply instantly
+      settings.mode = modeSelect.value === "bag" ? "bag" : "normal";
+      modeSelect2.value = settings.mode;
+
+      settings.calloutMode = calloutModeSelect.value;
+      settings.calloutEvery = clampInt(calloutEveryInput.value, 3, 60, defaultSettings.calloutEvery);
+      settings.calloutOrder = calloutOrderSelect.value === "sequential" ? "sequential" : "random";
+      settings.voiceURI = voiceSelect.value || "default";
+      settings.comboListText = comboListInput.value;
+
       const wantUltra = !!ultraToggle.checked;
       settings.ultra = wantUltra;
+      settings.keepAwake = !!keepAwakeToggle.checked;
 
       saveSettings(settings);
-      applyUltraUI(wantUltra);
 
-      // If timer is idle, reflect new base time
+      applyUltraUI(wantUltra);
+      if (settings.keepAwake) setWakeLock(true);
+      else setWakeLock(false);
+
+      // If timer idle, reflect new base time
       if (state.phase === "ready"){
         state.remaining = settings.roundLen;
       }
       render();
     }
 
-    [roundsInput, roundLenInput, restLenInput, volumeInput].forEach(el=>{
+    // Wire changes
+    [roundsInput, roundLenInput, restLenInput, volumeInput, voiceVolInput, calloutEveryInput].forEach(el=>{
       el.addEventListener("input", onSettingsChange);
       el.addEventListener("change", onSettingsChange);
     });
-    [tenSecToggle, bellTripleToggle, soundToggle, ultraToggle].forEach(el=>{
+    [tenSecToggle, bellTripleToggle, soundToggle, beepBeforeCalloutToggle,
+     ultraToggle, keepAwakeToggle, calloutModeSelect, calloutOrderSelect, voiceSelect].forEach(el=>{
       el.addEventListener("change", onSettingsChange);
     });
 
-    // Stats controls
+    // Mode select in two places
+    function setModeFromSelect(val){
+      settings.mode = val === "bag" ? "bag" : "normal";
+      modeSelect.value = settings.mode;
+      modeSelect2.value = settings.mode;
+      saveSettings(settings);
+      render();
+    }
+    modeSelect.addEventListener("change", ()=>{ setModeFromSelect(modeSelect.value); });
+    modeSelect2.addEventListener("change", ()=>{ setModeFromSelect(modeSelect2.value); });
+
+    addDefaultCombosBtn.addEventListener("click", ()=>{
+      comboListInput.value = DEFAULT_COMBOS.join("\n");
+      onSettingsChange();
+    });
+    clearCombosBtn.addEventListener("click", ()=>{
+      comboListInput.value = "";
+      onSettingsChange();
+    });
+
+    /********************
+     * Stats controls
+     ********************/
     clearStatsBtn.addEventListener("click", ()=>{
       if (!confirm("Clear stats?")) return;
       stats = { completed: 0, totalSeconds: 0 };
@@ -1275,24 +1596,74 @@
       updateStatsUI();
     });
 
-    /***************
+    /********************
+     * Data tab
+     ********************/
+    hardResetBtn.addEventListener("click", ()=>{
+      if (!confirm("Reset ALL settings?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      settings = loadSettings();
+      saveSettings(settings);
+      syncSettingsUI();
+      applyUltraUI(false);
+      resetToReady();
+    });
+
+    exportBtn.addEventListener("click", ()=>{
+      const blob = JSON.stringify({ settings, favs: loadFavs(), stats }, null, 2);
+      window.prompt("Copy this export:", blob);
+    });
+
+    importBtn.addEventListener("click", ()=>{
+      const text = window.prompt("Paste export JSON here:");
+      if (!text) return;
+      try{
+        const obj = JSON.parse(text);
+        if (obj.settings) {
+          settings = { ...defaultSettings, ...obj.settings };
+          saveSettings(settings);
+        }
+        if (obj.favs) saveFavs(obj.favs);
+        if (obj.stats) { stats = obj.stats; saveStats(stats); }
+        populateFavs();
+        updateStatsUI();
+        syncSettingsUI();
+        applyUltraUI(!!settings.ultra);
+        resetToReady();
+      }catch{
+        alert("Invalid JSON.");
+      }
+    });
+
+    /********************
      * Init
-     ***************/
+     ********************/
     function init(){
       // If guard forced UI back this session
       if (sessionStorage.getItem("force_show_ui") === "1") {
-        // guarantee ultra off once
         settings.ultra = false;
         saveSettings(settings);
         sessionStorage.removeItem("force_show_ui");
       }
 
+      // apply shared settings
+      applyFromURL();
+
+      // presets/favs
       populatePresets();
       populateFavs();
+
+      // voices
+      populateVoices();
+
+      // sync ui
       syncSettingsUI();
       updateStatsUI();
 
-      // Apply ultra last
+      // keep awake
+      if (settings.keepAwake) setWakeLock(true);
+
+      // apply ultra last
       applyUltraUI(!!settings.ultra);
 
       resetToReady();
